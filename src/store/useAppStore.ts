@@ -9,7 +9,7 @@ import {
   NutritionEntry
 } from '../types';
 import { generateTrainingProgram } from '../utils/trainingPhaseGenerator';
-import { calculateMacroTargets } from '../utils/scientificCalculations';
+import { calculateMacroTargets, calculateBMR, calculateTDEE } from '../utils/scientificCalculations';
 
 interface AppStore extends AppState {
   // Actions
@@ -217,7 +217,17 @@ export const useTargetMacros = () => {
   
   if (!currentPhase || !userProfile) return null;
   
-  return calculateMacroTargets(userProfile, currentPhase);
+  const bmr = calculateBMR(userProfile);
+  const tdee = calculateTDEE(bmr, userProfile.activityLevel);
+  
+  return calculateMacroTargets(
+    userProfile.weight,
+    userProfile.bodyFatPercentage,
+    tdee,
+    2.2, // default protein multiplier
+    40,  // default carb percentage
+    25   // default fat percentage
+  );
 };
 
 export const useMacroCompliance = () => {

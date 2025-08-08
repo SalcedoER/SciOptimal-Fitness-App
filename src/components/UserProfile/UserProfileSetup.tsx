@@ -420,8 +420,8 @@ const UserProfileSetup: React.FC = () => {
                   <FormControl fullWidth>
                     <InputLabel>Sleep Quality Tracking</InputLabel>
                     <Select {...field} label="Sleep Quality Tracking">
-                      <MenuItem value={true}>Enable Sleep Tracking</MenuItem>
-                      <MenuItem value={false}>Disable Sleep Tracking</MenuItem>
+                      <MenuItem value="true">Enable Sleep Tracking</MenuItem>
+                      <MenuItem value="false">Disable Sleep Tracking</MenuItem>
                     </Select>
                   </FormControl>
                 )}

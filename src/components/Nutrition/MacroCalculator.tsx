@@ -72,7 +72,10 @@ const MacroCalculator: React.FC = () => {
       customSettings.fatPercentage
     );
 
-    setMacroTargets(macros);
+    setMacroTargets({
+      ...macros,
+      calories: adjustedCalories
+    });
   };
 
   const getActivityMultiplier = (activityLevel: string) => {
