@@ -6,7 +6,7 @@ import { QueryClient, QueryClientProvider } from 'react-query';
 
 // Components
 import Layout from './components/Layout/Layout';
-import UserProfileSetup from './components/UserProfile/UserProfileSetup';
+import AIPoweredProfileSetup from './components/UserProfile/AIPoweredProfileSetup';
 import Dashboard from './components/Dashboard/Dashboard';
 import WorkoutTracker from './components/Workout/WorkoutTracker';
 import NutritionTracker from './components/Nutrition/NutritionTracker';
@@ -16,6 +16,8 @@ import MealPlanner from './components/Nutrition/MealPlanner';
 import ProgressTracker from './components/Progress/ProgressTracker';
 import TrainingPlan from './components/Training/TrainingPlan';
 import Settings from './components/Settings/Settings';
+import AIAssistant from './components/AIAssistant/AIAssistant';
+import Reports from './components/Reports/Reports';
 
 // Hooks
 import { useUserProfile } from './store/useAppStore';
@@ -98,54 +100,6 @@ const theme = createTheme({
             outline: '2px solid rgba(255,255,255,0.5)',
             outlineOffset: '2px',
           },
-        },
-        contained: {
-          background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
-          color: '#000000',
-          boxShadow: '0 4px 12px rgba(255,255,255,0.15)',
-          border: '1px solid rgba(255,255,255,0.2)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)',
-            boxShadow: '0 6px 16px rgba(255,255,255,0.25)',
-            transform: 'translateY(-1px)',
-          },
-          '&:active': {
-            transform: 'translateY(0px)',
-            boxShadow: '0 2px 8px rgba(255,255,255,0.15)',
-          },
-          '&:disabled': {
-            background: 'rgba(255,255,255,0.3)',
-            color: 'rgba(0,0,0,0.5)',
-            border: '1px solid rgba(255,255,255,0.1)',
-          },
-        },
-        outlined: {
-          borderColor: '#888888',
-          color: '#ffffff',
-          borderWidth: '2px',
-          '&:hover': {
-            borderColor: '#ffffff',
-            backgroundColor: 'rgba(255,255,255,0.05)',
-            borderWidth: '2px',
-          },
-        },
-      },
-    },
-    MuiCard: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.3)',
-          border: '1px solid rgba(255,255,255,0.05)',
-        },
-      },
-    },
-    MuiPaper: {
-      styleOverrides: {
-        root: {
-          borderRadius: 16,
-          background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)',
         },
       },
     },
@@ -233,7 +187,7 @@ function App() {
                 path="/setup" 
                 element={
                   <PublicRoute>
-                    <UserProfileSetup />
+                    <AIPoweredProfileSetup />
                   </PublicRoute>
                 } 
               />
@@ -254,7 +208,9 @@ function App() {
                 <Route path="sleep" element={<SleepTracker />} />
                 <Route path="progress" element={<ProgressTracker />} />
                 <Route path="training" element={<TrainingPlan />} />
+                <Route path="reports" element={<Reports />} />
                 <Route path="settings" element={<Settings />} />
+                <Route path="ai-assistant" element={<AIAssistant />} />
               </Route>
               
               {/* Catch all route */}

@@ -5,7 +5,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'bench_press_barbell',
     name: 'Barbell Bench Press',
-    muscleGroups: ['chest'],
+    muscle_group: ['chest'],
     equipment: ['barbells', 'bench'],
     category: 'compound',
     sets: 4,
@@ -19,7 +19,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'bench_press_dumbbell',
     name: 'Dumbbell Bench Press',
-    muscleGroups: ['chest'],
+    muscle_group: ['chest'],
     equipment: ['dumbbells', 'bench'],
     category: 'compound',
     sets: 3,
@@ -33,7 +33,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'incline_press_barbell',
     name: 'Incline Barbell Press',
-    muscleGroups: ['chest'],
+    muscle_group: ['chest'],
     equipment: ['barbells', 'bench'],
     category: 'compound',
     sets: 3,
@@ -47,7 +47,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'decline_press',
     name: 'Decline Barbell Press',
-    muscleGroups: ['chest'],
+    muscle_group: ['chest'],
     equipment: ['barbells', 'bench'],
     category: 'compound',
     sets: 3,
@@ -61,7 +61,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'cable_flyes',
     name: 'Cable Flyes',
-    muscleGroups: ['chest'],
+    muscle_group: ['chest'],
     equipment: ['cables'],
     category: 'isolation',
     sets: 3,
@@ -75,7 +75,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'dumbbell_flyes',
     name: 'Dumbbell Flyes',
-    muscleGroups: ['chest'],
+    muscle_group: ['chest'],
     equipment: ['dumbbells', 'bench'],
     category: 'isolation',
     sets: 3,
@@ -91,7 +91,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'deadlift',
     name: 'Barbell Deadlift',
-    muscleGroups: ['back'],
+    muscle_group: ['back'],
     equipment: ['barbells'],
     category: 'compound',
     sets: 4,
@@ -105,7 +105,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'barbell_rows',
     name: 'Barbell Rows',
-    muscleGroups: ['back'],
+    muscle_group: ['back'],
     equipment: ['barbells'],
     category: 'compound',
     sets: 4,
@@ -119,7 +119,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'pull_ups',
     name: 'Pull-ups',
-    muscleGroups: ['back'],
+    muscle_group: ['back'],
     equipment: [],
     category: 'compound',
     sets: 3,
@@ -133,7 +133,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'lat_pulldown',
     name: 'Lat Pulldown',
-    muscleGroups: ['back'],
+    muscle_group: ['back'],
     equipment: ['machines'],
     category: 'compound',
     sets: 3,
@@ -147,7 +147,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'cable_rows',
     name: 'Cable Rows',
-    muscleGroups: ['back'],
+    muscle_group: ['back'],
     equipment: ['cables'],
     category: 'compound',
     sets: 3,
@@ -161,7 +161,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'face_pulls',
     name: 'Face Pulls',
-    muscleGroups: ['back'],
+    muscle_group: ['back'],
     equipment: ['cables'],
     category: 'isolation',
     sets: 3,
@@ -177,7 +177,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'overhead_press',
     name: 'Overhead Press',
-    muscleGroups: ['shoulders'],
+    muscle_group: ['shoulders'],
     equipment: ['barbells'],
     category: 'compound',
     sets: 4,
@@ -191,7 +191,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'dumbbell_press',
     name: 'Dumbbell Shoulder Press',
-    muscleGroups: ['shoulders'],
+    muscle_group: ['shoulders'],
     equipment: ['dumbbells'],
     category: 'compound',
     sets: 3,
@@ -205,7 +205,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'lateral_raises',
     name: 'Lateral Raises',
-    muscleGroups: ['shoulders'],
+    muscle_group: ['shoulders'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -219,7 +219,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'rear_delt_flyes',
     name: 'Rear Delt Flyes',
-    muscleGroups: ['shoulders'],
+    muscle_group: ['shoulders'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -233,7 +233,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'upright_rows',
     name: 'Upright Rows',
-    muscleGroups: ['shoulders'],
+    muscle_group: ['shoulders'],
     equipment: ['barbells'],
     category: 'compound',
     sets: 3,
@@ -249,7 +249,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'barbell_curls',
     name: 'Barbell Curls',
-    muscleGroups: ['arms'],
+    muscle_group: ['arms'],
     equipment: ['barbells'],
     category: 'isolation',
     sets: 3,
@@ -263,7 +263,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'dumbbell_curls',
     name: 'Dumbbell Curls',
-    muscleGroups: ['arms'],
+    muscle_group: ['arms'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -277,7 +277,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'hammer_curls',
     name: 'Hammer Curls',
-    muscleGroups: ['arms'],
+    muscle_group: ['arms'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -291,7 +291,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'tricep_dips',
     name: 'Tricep Dips',
-    muscleGroups: ['arms'],
+    muscle_group: ['arms'],
     equipment: [],
     category: 'compound',
     sets: 3,
@@ -305,7 +305,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'tricep_pushdowns',
     name: 'Tricep Pushdowns',
-    muscleGroups: ['arms'],
+    muscle_group: ['arms'],
     equipment: ['cables'],
     category: 'isolation',
     sets: 3,
@@ -319,7 +319,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'skull_crushers',
     name: 'Skull Crushers',
-    muscleGroups: ['arms'],
+    muscle_group: ['arms'],
     equipment: ['barbells', 'bench'],
     category: 'isolation',
     sets: 3,
@@ -335,7 +335,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'squat',
     name: 'Barbell Squat',
-    muscleGroups: ['legs'],
+    muscle_group: ['legs'],
     equipment: ['barbells', 'squat_rack'],
     category: 'compound',
     sets: 4,
@@ -349,7 +349,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'deadlift_romanian',
     name: 'Romanian Deadlift',
-    muscleGroups: ['legs'],
+    muscle_group: ['legs'],
     equipment: ['barbells'],
     category: 'compound',
     sets: 3,
@@ -363,7 +363,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'leg_press',
     name: 'Leg Press',
-    muscleGroups: ['legs'],
+    muscle_group: ['legs'],
     equipment: ['machines'],
     category: 'compound',
     sets: 3,
@@ -377,7 +377,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'leg_extensions',
     name: 'Leg Extensions',
-    muscleGroups: ['legs'],
+    muscle_group: ['legs'],
     equipment: ['machines'],
     category: 'isolation',
     sets: 3,
@@ -391,7 +391,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'leg_curls',
     name: 'Leg Curls',
-    muscleGroups: ['legs'],
+    muscle_group: ['legs'],
     equipment: ['machines'],
     category: 'isolation',
     sets: 3,
@@ -405,7 +405,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'calf_raises',
     name: 'Standing Calf Raises',
-    muscleGroups: ['legs'],
+    muscle_group: ['legs'],
     equipment: ['machines'],
     category: 'isolation',
     sets: 4,
@@ -421,7 +421,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'plank',
     name: 'Plank',
-    muscleGroups: ['core'],
+    muscle_group: ['core'],
     equipment: [],
     category: 'abs',
     sets: 3,
@@ -435,7 +435,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'crunches',
     name: 'Crunches',
-    muscleGroups: ['core'],
+    muscle_group: ['core'],
     equipment: [],
     category: 'abs',
     sets: 3,
@@ -449,7 +449,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'leg_raises',
     name: 'Leg Raises',
-    muscleGroups: ['core'],
+    muscle_group: ['core'],
     equipment: [],
     category: 'abs',
     sets: 3,
@@ -463,7 +463,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'russian_twists',
     name: 'Russian Twists',
-    muscleGroups: ['core'],
+    muscle_group: ['core'],
     equipment: [],
     category: 'abs',
     sets: 3,
@@ -477,7 +477,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'mountain_climbers',
     name: 'Mountain Climbers',
-    muscleGroups: ['core'],
+    muscle_group: ['core'],
     equipment: [],
     category: 'abs',
     sets: 3,
@@ -493,7 +493,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'zottman_curls',
     name: 'Zottman Curls',
-    muscleGroups: ['forearms', 'arms'],
+    muscle_group: ['forearms', 'arms'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -507,7 +507,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'wrist_curls',
     name: 'Wrist Curls',
-    muscleGroups: ['forearms'],
+    muscle_group: ['forearms'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -521,7 +521,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'reverse_wrist_curls',
     name: 'Reverse Wrist Curls',
-    muscleGroups: ['forearms'],
+    muscle_group: ['forearms'],
     equipment: ['dumbbells'],
     category: 'isolation',
     sets: 3,
@@ -535,7 +535,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'farmers_carries',
     name: 'Farmer\'s Carries',
-    muscleGroups: ['forearms'],
+    muscle_group: ['forearms'],
     equipment: ['dumbbells'],
     category: 'accessory',
     sets: 3,
@@ -549,7 +549,7 @@ export const EXERCISES: Exercise[] = [
   {
     id: 'plate_pinch',
     name: 'Plate Pinch',
-    muscleGroups: ['forearms'],
+    muscle_group: ['forearms'],
     equipment: [],
     category: 'isolation',
     sets: 3,
@@ -565,13 +565,13 @@ export const EXERCISES: Exercise[] = [
 // Helper functions to filter exercises
 export function getExercisesByMuscleGroup(muscleGroup: MuscleGroup): Exercise[] {
   return EXERCISES.filter(exercise => 
-    exercise.muscleGroups.includes(muscleGroup)
+    exercise.muscle_group.indexOf(muscleGroup) !== -1
   );
 }
 
 export function getExercisesByEquipment(equipment: Equipment[]): Exercise[] {
   return EXERCISES.filter(exercise => 
-    equipment.some(eq => exercise.equipment.includes(eq))
+    equipment.some(eq => exercise.equipment.indexOf(eq) !== -1)
   );
 }
 
@@ -597,6 +597,6 @@ export function getAbsExercises(): Exercise[] {
 
 export function getForearmExercises(): Exercise[] {
   return EXERCISES.filter(exercise => 
-    exercise.muscleGroups.includes('forearms')
+    exercise.muscle_group.indexOf('forearms') !== -1
   );
 }

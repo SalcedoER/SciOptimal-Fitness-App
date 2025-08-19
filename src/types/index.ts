@@ -3,7 +3,7 @@ export interface UserProfile {
   id: string;
   name: string;
   age: number;
-  height: number; // in cm
+  height: number; // in inches
   weight: number; // in kg
   bodyFatPercentage: number;
   goalWeight?: number;
@@ -34,7 +34,11 @@ export type Equipment =
   | 'smith_machine' 
   | 'treadmill' 
   | 'bench' 
-  | 'squat_rack';
+  | 'squat_rack'
+  | 'pull_up_bar'
+  | 'resistance_bands'
+  | 'bodyweight_only'
+  | 'gym_membership';
 
 // Training Phase Types
 export interface TrainingPhase {
@@ -48,6 +52,8 @@ export interface TrainingPhase {
   nutritionPlan: NutritionPlan;
   cardioPlan: CardioPlan;
   progressionRules: ProgressionRule[];
+  createdAt: Date;
+  updatedAt?: Date;
 }
 
 export type PhaseFocus = 'lean_recomp' | 'muscle_gain' | 'final_cut';
@@ -80,7 +86,7 @@ export type MuscleGroup =
 export interface Exercise {
   id: string;
   name: string;
-  muscleGroups: MuscleGroup[];
+  muscle_group: MuscleGroup[];
   equipment: Equipment[];
   category: ExerciseCategory;
   sets: number;
@@ -113,11 +119,12 @@ export interface NutritionPlan {
 }
 
 export interface MacroTargets {
-  protein: number; // grams
-  carbs: number; // grams
-  fat: number; // grams
-  fiber: number; // grams
-  sodium?: number; // mg
+  protein_g: number; // grams
+  carbs_g: number; // grams
+  fat_g: number; // grams
+  fiber_g: number; // grams
+  sodium_mg?: number; // mg
+  potassium_mg?: number; // mg
 }
 
 export interface MealTiming {
@@ -136,7 +143,7 @@ export interface HydrationPlan {
 
 export interface Supplement {
   name: string;
-  dosage: string;
+  dose: string;
   timing: string;
   purpose: string;
 }
@@ -219,6 +226,19 @@ export interface CompletedSet {
   restTime: number;
 }
 
+// Workout Day Types
+export interface WorkoutDay {
+  id: string;
+  date: Date;
+  day_label: string;
+  include_warmups_in_volume: boolean;
+  exercises: Exercise[];
+  day_volume_lb: number | null;
+  duration: number; // minutes
+  rpe: number; // average RPE
+  notes?: string;
+}
+
 // App State Types
 export interface AppState {
   userProfile: UserProfile | null;
@@ -243,13 +263,13 @@ export interface NutritionEntry {
 
 export interface FoodItem {
   name: string;
-  calories: number;
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
-  sodium?: number;
-  servingSize: string;
+  kcal: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g: number | null;
+  sodium_mg?: number | null;
+  potassium_mg?: number | null;
 }
 
 // Scientific Data Types
@@ -292,4 +312,48 @@ export interface RecoveryGuideline {
   factor: string;
   recommendation: string;
   scientificBasis: string;
+}
+
+// Nutrition Day Types
+export interface NutritionDay {
+  id: string;
+  date: Date;
+  items: FoodItem[];
+  totals: MacroTargets;
+  supplements: Supplement[];
+  notes?: string;
+}
+
+// Macro Totals Types
+export interface MacroTotals {
+  kcal: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g: number | null;
+  sodium_mg?: number | null;
+  potassium_mg?: number | null;
+}
+
+// Sleep Entry Types
+export interface SleepEntry {
+  id: string;
+  date: Date;
+  bedTime: string;
+  wakeUpTime: string;
+  sleepHours: number;
+  sleepQuality: number;
+  stressLevel: number;
+  caffeineIntake: number;
+  notes?: string;
+}
+
+// Meal Types
+export interface Meal {
+  id: string;
+  name: string;
+  mealType: string;
+  foods: FoodItem[];
+  macros: MacroTargets;
+  notes?: string;
 }

@@ -15,7 +15,9 @@ import {
   Avatar,
   Chip,
   useTheme,
-  useMediaQuery
+  useMediaQuery,
+  Divider,
+  Button
 } from '@mui/material';
 import {
   Menu as MenuIcon,
@@ -26,9 +28,15 @@ import {
   Schedule as TrainingIcon,
   Settings as SettingsIcon,
   Person as PersonIcon,
-  Bedtime
+  Bedtime,
+  School,
+  Close,
+  SmartToy,
+  Logout,
+  Assessment
 } from '@mui/icons-material';
 import { useUserProfile, useCurrentPhase } from '../../store/useAppStore';
+import InstallPrompt from './InstallPrompt';
 
 const drawerWidth = 320; // Slightly wider for mobile
 
@@ -39,6 +47,8 @@ const navigationItems = [
   { path: '/sleep', label: 'Sleep', icon: <Bedtime /> },
   { path: '/progress', label: 'Progress', icon: <ProgressIcon /> },
   { path: '/training', label: 'Training Plan', icon: <TrainingIcon /> },
+  { path: '/ai-assistant', label: 'AI Coach', icon: <SmartToy /> },
+  { path: '/reports', label: 'Reports', icon: <Assessment /> },
   { path: '/settings', label: 'Settings', icon: <SettingsIcon /> },
 ];
 
@@ -118,6 +128,35 @@ const Layout: React.FC = () => {
               }}
             />
           )}
+          
+          {/* Logout Button */}
+          <Button
+            variant="outlined"
+            startIcon={<Logout />}
+            onClick={() => {
+              // Clear all data first
+              localStorage.clear();
+              sessionStorage.clear();
+              // Navigate to setup
+              navigate('/setup');
+              // Force a page reload to ensure clean state
+              setTimeout(() => {
+                window.location.reload();
+              }, 100);
+            }}
+            sx={{ 
+              mt: 2,
+              width: '100%',
+              borderColor: 'rgba(255,255,255,0.3)',
+              color: 'primary.main',
+              '&:hover': {
+                borderColor: 'rgba(255,255,255,0.5)',
+                backgroundColor: 'rgba(255,255,255,0.05)'
+              }
+            }}
+          >
+            Logout
+          </Button>
         </Box>
       )}
 
@@ -177,17 +216,7 @@ const Layout: React.FC = () => {
   return (
     <Box sx={{ display: 'flex' }}>
       {/* App Bar */}
-      <AppBar
-        position="fixed"
-        sx={{
-          width: { md: `calc(100% - ${drawerWidth}px)` },
-          ml: { md: `${drawerWidth}px` },
-          backgroundColor: 'transparent',
-          color: 'text.primary',
-          backdropFilter: 'blur(10px)',
-          borderBottom: '1px solid rgba(255,255,255,0.05)',
-        }}
-      >
+      <AppBar position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
         <Toolbar>
           <IconButton
             color="inherit"
@@ -199,15 +228,37 @@ const Layout: React.FC = () => {
             <MenuIcon />
           </IconButton>
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
-            {navigationItems.find(item => item.path === location.pathname)?.label || 'Dashboard'}
+            SciOptimal
           </Typography>
-          {currentPhase && (
-            <Chip
-              label={`Phase ${currentPhase.focus.replace('_', ' ')}`}
-              size="small"
-              color="primary"
+          
+          {/* Mobile Logout Button */}
+          {userProfile && (
+            <Button
               variant="outlined"
-            />
+              startIcon={<Logout />}
+              onClick={() => {
+                // Clear all data first
+                localStorage.clear();
+                sessionStorage.clear();
+                // Navigate to setup
+                navigate('/setup');
+                // Force a page reload to ensure clean state
+                setTimeout(() => {
+                  window.location.reload();
+                }, 100);
+              }}
+              sx={{ 
+                display: { xs: 'flex', md: 'none' },
+                borderColor: 'rgba(255,255,255,0.3)',
+                color: 'primary.main',
+                '&:hover': {
+                  borderColor: 'rgba(255,255,255,0.5)',
+                  backgroundColor: 'rgba(255,255,255,0.05)'
+                }
+              }}
+            >
+              Logout
+            </Button>
           )}
         </Toolbar>
       </AppBar>
@@ -271,6 +322,9 @@ const Layout: React.FC = () => {
           <Outlet />
         </Box>
       </Box>
+
+      {/* Install Prompt for PWA */}
+      <InstallPrompt />
     </Box>
   );
 };

@@ -30,24 +30,12 @@ import {
   Add as AddIcon,
   Edit as EditIcon 
 } from '@mui/icons-material';
-import { useAppStore } from '../../store/useAppStore';
-
-interface SleepEntry {
-  id: string;
-  date: Date;
-  bedTime: string;
-  wakeUpTime: string;
-  sleepHours: number;
-  sleepQuality: number;
-  notes?: string;
-  stressLevel?: number;
-  caffeineIntake?: number; // hours before bed
-  screenTime?: number; // hours before bed
-}
+import { useAppStore, useSleepLog } from '../../store/useAppStore';
+import { SleepEntry } from '../../types';
 
 const SleepTracker: React.FC = () => {
-  const { userProfile, currentPhase } = useAppStore();
-  const [sleepEntries, setSleepEntries] = useState<SleepEntry[]>([]);
+  const { userProfile, currentPhase, addSleepEntry } = useAppStore();
+  const sleepEntries = useSleepLog();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<Partial<SleepEntry>>({
     bedTime: userProfile?.sleepSchedule.bedTime || '22:00',
@@ -55,8 +43,7 @@ const SleepTracker: React.FC = () => {
     sleepHours: userProfile?.sleepSchedule.targetSleepHours || 8,
     sleepQuality: 7,
     stressLevel: 5,
-    caffeineIntake: 6,
-    screenTime: 1
+    caffeineIntake: 6
   });
 
   const calculateSleepEfficiency = (entry: SleepEntry) => {
@@ -86,13 +73,13 @@ const SleepTracker: React.FC = () => {
         wakeUpTime: currentEntry.wakeUpTime,
         sleepHours: currentEntry.sleepHours,
         sleepQuality: currentEntry.sleepQuality || 7,
-        notes: currentEntry.notes,
-        stressLevel: currentEntry.stressLevel,
-        caffeineIntake: currentEntry.caffeineIntake,
-        screenTime: currentEntry.screenTime
+        stressLevel: currentEntry.stressLevel || 5,
+        caffeineIntake: currentEntry.caffeineIntake || 6,
+        notes: currentEntry.notes
       };
 
-      setSleepEntries([newEntry, ...sleepEntries]);
+      // Add to global store instead of local state
+      addSleepEntry(newEntry);
       setShowAddDialog(false);
       setCurrentEntry({
         bedTime: userProfile?.sleepSchedule.bedTime || '22:00',
@@ -100,8 +87,7 @@ const SleepTracker: React.FC = () => {
         sleepHours: userProfile?.sleepSchedule.targetSleepHours || 8,
         sleepQuality: 7,
         stressLevel: 5,
-        caffeineIntake: 6,
-        screenTime: 1
+        caffeineIntake: 6
       });
     }
   };
@@ -224,13 +210,7 @@ const SleepTracker: React.FC = () => {
                       variant="outlined"
                     />
                   )}
-                  {entry.screenTime && (
-                    <Chip 
-                      label={`Screen: ${entry.screenTime}h before bed`} 
-                      size="small" 
-                      variant="outlined"
-                    />
-                  )}
+
                 </Box>
 
                 {entry.notes && (

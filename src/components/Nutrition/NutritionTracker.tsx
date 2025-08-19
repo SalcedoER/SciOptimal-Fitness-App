@@ -55,25 +55,23 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
   const [foods, setFoods] = useState<FoodItem[]>([]);
   const [currentFood, setCurrentFood] = useState<FoodItem>({
     name: '',
-    calories: 0,
-    protein: 0,
-    carbs: 0,
-    fat: 0,
-    fiber: 0,
-    servingSize: '1 serving'
+    kcal: 0,
+    protein_g: 0,
+    carbs_g: 0,
+    fat_g: 0,
+    fiber_g: 0
   });
 
   const addFood = () => {
-    if (currentFood.name && currentFood.calories > 0) {
+    if (currentFood.name && currentFood.kcal > 0) {
       setFoods([...foods, { ...currentFood }]);
       setCurrentFood({
         name: '',
-        calories: 0,
-        protein: 0,
-        carbs: 0,
-        fat: 0,
-        fiber: 0,
-        servingSize: '1 serving'
+        kcal: 0,
+        protein_g: 0,
+        carbs_g: 0,
+        fat_g: 0,
+        fiber_g: 0
       });
     }
   };
@@ -84,12 +82,12 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
 
   const saveMeal = () => {
     if (foods.length > 0) {
-      const totalCalories = foods.reduce((sum, food) => sum + food.calories, 0);
+      const totalCalories = foods.reduce((sum, food) => sum + food.kcal, 0);
       const totalMacros: MacroTargets = {
-        protein: foods.reduce((sum, food) => sum + food.protein, 0),
-        carbs: foods.reduce((sum, food) => sum + food.carbs, 0),
-        fat: foods.reduce((sum, food) => sum + food.fat, 0),
-        fiber: foods.reduce((sum, food) => sum + food.fiber, 0)
+        protein_g: foods.reduce((sum, food) => sum + food.protein_g, 0),
+        carbs_g: foods.reduce((sum, food) => sum + food.carbs_g, 0),
+        fat_g: foods.reduce((sum, food) => sum + food.fat_g, 0),
+        fiber_g: foods.reduce((sum, food) => sum + (food.fiber_g || 0), 0)
       };
 
       const entry: NutritionEntry = {
@@ -122,22 +120,13 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
               size="small"
             />
           </Grid>
-          <Grid item xs={12} sm={6}>
-            <TextField
-              fullWidth
-              label="Serving Size"
-              value={currentFood.servingSize}
-              onChange={(e) => setCurrentFood({ ...currentFood, servingSize: e.target.value })}
-              size="small"
-            />
-          </Grid>
           <Grid item xs={12} sm={3}>
             <TextField
               fullWidth
               label="Calories"
               type="number"
-              value={currentFood.calories}
-              onChange={(e) => setCurrentFood({ ...currentFood, calories: Number(e.target.value) })}
+              value={currentFood.kcal}
+              onChange={(e) => setCurrentFood({ ...currentFood, kcal: Number(e.target.value) })}
               size="small"
             />
           </Grid>
@@ -146,8 +135,8 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
               fullWidth
               label="Protein (g)"
               type="number"
-              value={currentFood.protein}
-              onChange={(e) => setCurrentFood({ ...currentFood, protein: Number(e.target.value) })}
+              value={currentFood.protein_g}
+              onChange={(e) => setCurrentFood({ ...currentFood, protein_g: Number(e.target.value) })}
               size="small"
             />
           </Grid>
@@ -156,8 +145,8 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
               fullWidth
               label="Carbs (g)"
               type="number"
-              value={currentFood.carbs}
-              onChange={(e) => setCurrentFood({ ...currentFood, carbs: Number(e.target.value) })}
+              value={currentFood.carbs_g}
+              onChange={(e) => setCurrentFood({ ...currentFood, carbs_g: Number(e.target.value) })}
               size="small"
             />
           </Grid>
@@ -166,8 +155,8 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
               fullWidth
               label="Fat (g)"
               type="number"
-              value={currentFood.fat}
-              onChange={(e) => setCurrentFood({ ...currentFood, fat: Number(e.target.value) })}
+              value={currentFood.fat_g}
+              onChange={(e) => setCurrentFood({ ...currentFood, fat_g: Number(e.target.value) })}
               size="small"
             />
           </Grid>
@@ -176,7 +165,7 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
         <Button
           variant="outlined"
           onClick={addFood}
-          disabled={!currentFood.name || currentFood.calories === 0}
+          disabled={!currentFood.name || currentFood.kcal === 0}
           startIcon={<Add />}
           sx={{ mb: 2 }}
         >
@@ -194,7 +183,7 @@ const MealDialog: React.FC<MealDialogProps> = ({ open, onClose, onSave, mealType
                   </ListItemIcon>
                   <ListItemText
                     primary={food.name}
-                    secondary={`${food.calories} cal • P: ${food.protein}g • C: ${food.carbs}g • F: ${food.fat}g`}
+                    secondary={`${food.kcal} cal • P: ${food.protein_g}g • C: ${food.carbs_g}g • F: ${food.fat_g}g`}
                   />
                   <IconButton
                     size="small"
@@ -250,7 +239,7 @@ const NutritionTracker: React.FC = () => {
 
   const getCalorieProgress = () => {
     if (!targetMacros) return 0;
-    const targetCalories = targetMacros.protein * 4 + targetMacros.carbs * 4 + targetMacros.fat * 9;
+    const targetCalories = targetMacros.protein_g * 4 + targetMacros.carbs_g * 4 + targetMacros.fat_g * 9;
     return Math.min((macroTotals.calories / targetCalories) * 100, 100);
   };
 
@@ -298,7 +287,7 @@ const NutritionTracker: React.FC = () => {
                       {macroTotals.calories}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
-                      / {targetMacros ? Math.round(targetMacros.protein * 4 + targetMacros.carbs * 4 + targetMacros.fat * 9) : 0} cal
+                      / {targetMacros ? Math.round(targetMacros.protein_g * 4 + targetMacros.carbs_g * 4 + targetMacros.fat_g * 9) : 0} cal
                     </Typography>
                   </Box>
                   <LinearProgress 
@@ -311,7 +300,7 @@ const NutritionTracker: React.FC = () => {
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                     <WaterDrop color="primary" sx={{ mr: 1 }} />
                     <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                      {Math.round(macroTotals.fiber)}g
+                      {Math.round(macroTotals.fiber_g)}g
                     </Typography>
                     <Typography variant="body2" color="text.secondary" sx={{ ml: 1 }}>
                       fiber
@@ -319,7 +308,7 @@ const NutritionTracker: React.FC = () => {
                   </Box>
                   <LinearProgress 
                     variant="determinate" 
-                    value={targetMacros ? Math.min((macroTotals.fiber / targetMacros.fiber) * 100, 100) : 0}
+                    value={targetMacros ? Math.min((macroTotals.fiber_g / targetMacros.fiber_g) * 100, 100) : 0}
                     sx={{ height: 8, borderRadius: 4 }}
                   />
                 </Grid>
@@ -340,7 +329,7 @@ const NutritionTracker: React.FC = () => {
                 <Typography variant="subtitle2" gutterBottom>Protein</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Typography variant="body2" sx={{ mr: 1 }}>
-                    {macroTotals.protein}g / {targetMacros.protein}g
+                    {macroTotals.protein_g}g / {targetMacros.protein_g}g
                   </Typography>
                   <Chip 
                     label={`${Math.round(macroCompliance.protein)}%`}
@@ -360,7 +349,7 @@ const NutritionTracker: React.FC = () => {
                 <Typography variant="subtitle2" gutterBottom>Carbs</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Typography variant="body2" sx={{ mr: 1 }}>
-                    {macroTotals.carbs}g / {targetMacros.carbs}g
+                    {macroTotals.carbs_g}g / {targetMacros.carbs_g}g
                   </Typography>
                   <Chip 
                     label={`${Math.round(macroCompliance.carbs)}%`}
@@ -380,7 +369,7 @@ const NutritionTracker: React.FC = () => {
                 <Typography variant="subtitle2" gutterBottom>Fat</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Typography variant="body2" sx={{ mr: 1 }}>
-                    {macroTotals.fat}g / {targetMacros.fat}g
+                    {macroTotals.fat_g}g / {targetMacros.fat_g}g
                   </Typography>
                   <Chip 
                     label={`${Math.round(macroCompliance.fat)}%`}
@@ -400,7 +389,7 @@ const NutritionTracker: React.FC = () => {
                 <Typography variant="subtitle2" gutterBottom>Fiber</Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                   <Typography variant="body2" sx={{ mr: 1 }}>
-                    {macroTotals.fiber}g / {targetMacros.fiber}g
+                    {macroTotals.fiber_g}g / {targetMacros.fiber_g}g
                   </Typography>
                   <Chip 
                     label={`${Math.round(macroCompliance.fiber)}%`}
@@ -446,7 +435,7 @@ const NutritionTracker: React.FC = () => {
                         </ListItemIcon>
                         <ListItemText
                           primary={entry.meal}
-                          secondary={`${entry.totalCalories} calories • P: ${entry.macros.protein}g • C: ${entry.macros.carbs}g • F: ${entry.macros.fat}g`}
+                          secondary={`${entry.totalCalories} calories • P: ${entry.macros.protein_g}g • C: ${entry.macros.carbs_g}g • F: ${entry.macros.fat_g}g`}
                         />
                         <Chip label={entry.foods.length} size="small" />
                       </ListItem>

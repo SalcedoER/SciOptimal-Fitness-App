@@ -31,10 +31,10 @@ import { useAppStore } from '../../store/useAppStore';
 import { calculateBMR, calculateTDEE, calculateMacroTargets } from '../../utils/scientificCalculations';
 
 interface MacroTargets {
-  protein: number;
-  carbs: number;
-  fat: number;
-  fiber: number;
+  protein_g: number;
+  carbs_g: number;
+  fat_g: number;
+  fiber_g: number;
   calories: number;
 }
 
@@ -93,7 +93,7 @@ const MacroCalculator: React.FC = () => {
     if (!userProfile) return '2.2g per lb';
     
     const leanMass = userProfile.weight * (1 - userProfile.bodyFatPercentage / 100);
-    const proteinPerLb = (macroTargets?.protein || 0) / userProfile.weight;
+    const proteinPerLb = (macroTargets?.protein_g || 0) / userProfile.weight;
     
     if (proteinPerLb >= 2.2) return 'High protein (2.2g+ per lb)';
     if (proteinPerLb >= 1.6) return 'Moderate protein (1.6g per lb)';
@@ -170,7 +170,7 @@ const MacroCalculator: React.FC = () => {
                 <CardContent>
                   <Typography variant="h6" color="text.secondary">Protein</Typography>
                   <Typography variant="h3" color="primary.main">
-                    {macroTargets.protein.toFixed(0)}g
+                    {macroTargets.protein_g.toFixed(0)}g
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     {getProteinRecommendation()}
@@ -183,10 +183,10 @@ const MacroCalculator: React.FC = () => {
                 <CardContent>
                   <Typography variant="h6" color="text.secondary">Carbs</Typography>
                   <Typography variant="h3" color="success.main">
-                    {macroTargets.carbs.toFixed(0)}g
+                    {macroTargets.carbs_g.toFixed(0)}g
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {((macroTargets.carbs * 4 / macroTargets.calories) * 100).toFixed(0)}% of calories
+                    {((macroTargets.carbs_g * 4 / macroTargets.calories) * 100).toFixed(0)}% of calories
                   </Typography>
                 </CardContent>
               </Card>
@@ -196,10 +196,10 @@ const MacroCalculator: React.FC = () => {
                 <CardContent>
                   <Typography variant="h6" color="text.secondary">Fat</Typography>
                   <Typography variant="h3" color="warning.main">
-                    {macroTargets.fat.toFixed(0)}g
+                    {macroTargets.fat_g.toFixed(0)}g
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {((macroTargets.fat * 9 / macroTargets.calories) * 100).toFixed(0)}% of calories
+                    {((macroTargets.fat_g * 9 / macroTargets.calories) * 100).toFixed(0)}% of calories
                   </Typography>
                 </CardContent>
               </Card>
@@ -213,36 +213,36 @@ const MacroCalculator: React.FC = () => {
               <Grid container spacing={2}>
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Protein ({macroTargets.protein.toFixed(0)}g)</Typography>
-                    <Typography variant="body2">{((macroTargets.protein * 4 / macroTargets.calories) * 100).toFixed(0)}%</Typography>
+                    <Typography variant="body2">Protein ({macroTargets.protein_g.toFixed(0)}g)</Typography>
+                    <Typography variant="body2">{((macroTargets.protein_g * 4 / macroTargets.calories) * 100).toFixed(0)}%</Typography>
                   </Box>
                   <LinearProgress 
                     variant="determinate" 
-                    value={(macroTargets.protein * 4 / macroTargets.calories) * 100} 
+                    value={(macroTargets.protein_g * 4 / macroTargets.calories) * 100} 
                     color="primary"
                     sx={{ height: 8, borderRadius: 4 }}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Carbs ({macroTargets.carbs.toFixed(0)}g)</Typography>
-                    <Typography variant="body2">{((macroTargets.carbs * 4 / macroTargets.calories) * 100).toFixed(0)}%</Typography>
+                    <Typography variant="body2">Carbs ({macroTargets.carbs_g.toFixed(0)}g)</Typography>
+                    <Typography variant="body2">{((macroTargets.carbs_g * 4 / macroTargets.calories) * 100).toFixed(0)}%</Typography>
                   </Box>
                   <LinearProgress 
                     variant="determinate" 
-                    value={(macroTargets.carbs * 4 / macroTargets.calories) * 100} 
+                    value={(macroTargets.carbs_g * 4 / macroTargets.calories) * 100} 
                     color="success"
                     sx={{ height: 8, borderRadius: 4 }}
                   />
                 </Grid>
                 <Grid item xs={12}>
                   <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                    <Typography variant="body2">Fat ({macroTargets.fat.toFixed(0)}g)</Typography>
-                    <Typography variant="body2">{((macroTargets.fat * 9 / macroTargets.calories) * 100).toFixed(0)}%</Typography>
+                    <Typography variant="body2">Fat ({macroTargets.fat_g.toFixed(0)}g)</Typography>
+                    <Typography variant="body2">{((macroTargets.fat_g * 9 / macroTargets.calories) * 100).toFixed(0)}%</Typography>
                   </Box>
                   <LinearProgress 
                     variant="determinate" 
-                    value={(macroTargets.fat * 9 / macroTargets.calories) * 100} 
+                    value={(macroTargets.fat_g * 9 / macroTargets.calories) * 100} 
                     color="warning"
                     sx={{ height: 8, borderRadius: 4 }}
                   />
@@ -258,7 +258,7 @@ const MacroCalculator: React.FC = () => {
                 <CardContent>
                   <Typography variant="h6" gutterBottom>Fiber Target</Typography>
                   <Typography variant="h4" color="info.main">
-                    {macroTargets.fiber.toFixed(0)}g
+                    {macroTargets.fiber_g.toFixed(0)}g
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     Recommended daily fiber intake

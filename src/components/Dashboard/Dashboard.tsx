@@ -1,503 +1,388 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Grid,
   Card,
   CardContent,
   Typography,
-  Button,
   Chip,
   LinearProgress,
-  Avatar,
+  Button,
+  Alert,
+  Divider,
   List,
   ListItem,
   ListItemText,
   ListItemIcon,
-  Alert,
-  CircularProgress
+  Avatar
 } from '@mui/material';
 import {
   TrendingUp,
   FitnessCenter,
   Restaurant,
+  Bedtime,
   Schedule,
-  TrendingDown
+  CheckCircle,
+  Warning,
+  Info,
+  PlayArrow,
+  Timer,
+  LocalFireDepartment
 } from '@mui/icons-material';
-import { format } from 'date-fns';
-import {
-  useUserProfile,
-  useCurrentPhase,
-  useLatestProgress,
-  useTodayWorkout,
-  useTodayNutrition,
-  useMacroTotals,
-  useTargetMacros,
-  useMacroCompliance,
-  useProgressTrends
-} from '../../store/useAppStore';
+import { useUserProfile, useCurrentPhase, useMacroTotals, useTargetMacros, useMacroCompliance, useTodayWorkout, useTodayNutrition, useLatestProgress } from '../../store/useAppStore';
+import BodyDiagram from '../BodyDiagram/BodyDiagram';
 
 const Dashboard: React.FC = () => {
-  const navigate = useNavigate();
   const userProfile = useUserProfile();
   const currentPhase = useCurrentPhase();
-  const latestProgress = useLatestProgress();
-  const todayWorkout = useTodayWorkout();
-  const todayNutrition = useTodayNutrition();
   const macroTotals = useMacroTotals();
   const targetMacros = useTargetMacros();
   const macroCompliance = useMacroCompliance();
-  const progressTrends = useProgressTrends();
+  const todayWorkout = useTodayWorkout();
+  const todayNutrition = useTodayNutrition();
+  const latestProgress = useLatestProgress();
 
-  if (!userProfile || !currentPhase) {
+  if (!userProfile) {
     return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
-        <CircularProgress />
-      </Box>
+      <Alert severity="info">
+        Please complete your profile setup to view the dashboard.
+      </Alert>
     );
   }
 
-  const getWeightChange = () => {
-    if (!progressTrends?.weightTrend || progressTrends.weightTrend.length < 2) return 0;
-    const recent = progressTrends.weightTrend.slice(-2);
-    return recent[1].weight - recent[0].weight;
-  };
-
-  const weightChange = getWeightChange();
-  const isWeightGaining = weightChange > 0;
-
-  const getTodayWorkoutStatus = () => {
-    if (todayWorkout) {
-      return { status: 'completed', text: 'Workout Completed', color: 'success' as const };
-    }
-    
+  const getToday = () => {
     const today = new Date().getDay();
-    const isWorkoutDay = !currentPhase.trainingSplit.restDays.includes(today);
-    
-    if (isWorkoutDay) {
-      return { status: 'pending', text: 'Workout Pending', color: 'warning' as const };
-    }
-    
-    return { status: 'rest', text: 'Rest Day', color: 'info' as const };
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    return days[today];
   };
 
-  const workoutStatus = getTodayWorkoutStatus();
+  const isWorkoutDay = currentPhase?.trainingSplit.restDays.indexOf(new Date().getDay()) === -1;
 
-  const getMacroProgressColor = (percentage: number) => {
-    if (percentage >= 90 && percentage <= 110) return 'success';
-    if (percentage >= 80 && percentage <= 120) return 'warning';
+  const getMacroProgress = (current: number, target: number) => {
+    return target > 0 ? Math.min((current / target) * 100, 100) : 0;
+  };
+
+  const getMacroColor = (percentage: number) => {
+    if (percentage >= 90) return 'success';
+    if (percentage >= 70) return 'warning';
     return 'error';
   };
 
   return (
     <Box>
-      {/* Header */}
+      {/* Welcome Header */}
       <Box sx={{ mb: 4 }}>
-        <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-          Welcome back, {userProfile.name}!
+        <Typography variant="h4" gutterBottom sx={{ fontWeight: 700, color: 'primary.main' }}>
+          Welcome back, {userProfile.name}! 👋
         </Typography>
-        <Typography variant="body1" color="text.secondary">
-          {format(new Date(), 'EEEE, MMMM do, yyyy')} • {currentPhase.name}
+        <Typography variant="h6" color="text.secondary">
+          {currentPhase ? `Currently in ${currentPhase.name}` : 'Ready to start your fitness journey'}
         </Typography>
       </Box>
 
-      {/* Overview Cards */}
-      <Grid container spacing={2} sx={{ mb: 4 }}>
-        {/* Current Weight */}
+      {/* Body Coverage Diagram */}
+      <BodyDiagram showWeekly={true} title="This Week's Body Coverage" />
+
+      {/* Quick Stats */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ 
-            background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)',
-            border: '1px solid rgba(255,255,255,0.05)'
-          }}>
-            <CardContent sx={{ p: 3 }}>
+          <Card sx={{ height: '100%' }}>
+            <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ 
-                  bgcolor: 'primary.main', 
-                  mr: 2,
-                  width: 48,
-                  height: 48,
-                  boxShadow: '0 4px 12px rgba(255,255,255,0.2)'
-                }}>
-                  <TrendingUp />
-                </Avatar>
-                <Box>
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    {latestProgress?.weight || userProfile.weight} lbs
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Current Weight
-                  </Typography>
-                </Box>
+                <FitnessCenter sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {currentPhase?.trainingSplit.days.length || 0}
+                </Typography>
               </Box>
-              {weightChange !== 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  {isWeightGaining ? (
-                    <TrendingUp color="success" fontSize="small" />
-                  ) : (
-                    <TrendingDown color="error" fontSize="small" />
-                  )}
-                  <Typography 
-                    variant="body2" 
-                    color={isWeightGaining ? 'success.main' : 'error.main'}
-                    sx={{ ml: 0.5, fontWeight: 500 }}
-                  >
-                    {Math.abs(weightChange).toFixed(1)} kg this week
-                  </Typography>
-                </Box>
-              )}
+              <Typography variant="body2" color="text.secondary">
+                Weekly Workouts
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Target Weight */}
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'secondary.main', mr: 2 }}>
-                  <Schedule />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {currentPhase.targetWeight} kg
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Target Weight
-                  </Typography>
-                </Box>
+                <Restaurant sx={{ mr: 1, color: 'success.main' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {todayNutrition.length}
+                </Typography>
               </Box>
-              <LinearProgress 
-                variant="determinate" 
-                value={((latestProgress?.weight || userProfile.weight) / currentPhase.targetWeight) * 100}
-                sx={{ height: 8, borderRadius: 4 }}
-              />
+              <Typography variant="body2" color="text.secondary">
+                Today's Meals
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Today's Workout */}
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: `${workoutStatus.color}.main`, mr: 2 }}>
-                  <FitnessCenter />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {workoutStatus.text}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Today's Status
-                  </Typography>
-                </Box>
+                <Bedtime sx={{ mr: 1, color: 'info.main' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {userProfile.sleepSchedule.targetSleepHours}h
+                </Typography>
               </Box>
-              {workoutStatus.status === 'pending' && (
-                <Button 
-                  variant="contained" 
-                  size="small" 
-                  onClick={() => navigate('/workout')}
-                  startIcon={<FitnessCenter />}
-                >
-                  Start Workout
-                </Button>
-              )}
+              <Typography variant="body2" color="text.secondary">
+                Sleep Target
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Nutrition Progress */}
         <Grid item xs={12} sm={6} md={3}>
-          <Card>
+          <Card sx={{ height: '100%' }}>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'success.main', mr: 2 }}>
-                  <Restaurant />
-                </Avatar>
-                <Box>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {macroTotals.calories}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Calories Today
-                  </Typography>
-                </Box>
+                <TrendingUp sx={{ mr: 1, color: 'warning.main' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  {userProfile.weight}kg
+                </Typography>
               </Box>
-              {targetMacros && (
-                <LinearProgress 
-                  variant="determinate" 
-                  value={Math.min((macroTotals.calories / (targetMacros.protein * 4 + targetMacros.carbs * 4 + targetMacros.fat * 9)) * 100, 100)}
-                  sx={{ height: 8, borderRadius: 4 }}
-                />
-              )}
+              <Typography variant="body2" color="text.secondary">
+                Current Weight
+              </Typography>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
 
-      {/* Main Content */}
-      <Grid container spacing={3}>
-        {/* Left Column */}
-        <Grid item xs={12} lg={8}>
-          {/* Today's Workout */}
-          <Card sx={{ mb: 3 }}>
+      {/* Today's Overview */}
+      <Grid container spacing={3} sx={{ mb: 4 }}>
+        {/* Workout Status */}
+        <Grid item xs={12} md={6}>
+          <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Schedule sx={{ mr: 1, color: 'primary.main' }} />
                 <Typography variant="h6" sx={{ fontWeight: 600 }}>
                   Today's Workout
                 </Typography>
-                <Chip 
-                  label={workoutStatus.text} 
-                  color={workoutStatus.color}
-                  size="small"
-                />
               </Box>
               
-              {workoutStatus.status === 'completed' ? (
-                <Alert severity="success" sx={{ mb: 2 }}>
-                  Great job! You completed today's workout.
-                </Alert>
-              ) : workoutStatus.status === 'pending' ? (
+              {isWorkoutDay ? (
                 <Box>
-                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                    Ready to crush your workout? Let's get started!
+                  <Typography variant="body1" gutterBottom>
+                    {getToday()} - Training Day
                   </Typography>
-                  <Button 
-                    variant="contained" 
-                    onClick={() => navigate('/workout')}
-                    startIcon={<FitnessCenter />}
-                  >
-                    Start Workout
-                  </Button>
+                  {todayWorkout ? (
+                    <Box sx={{ mt: 2 }}>
+                      <Chip 
+                        icon={<CheckCircle />} 
+                        label="Workout Completed" 
+                        color="success" 
+                        sx={{ mb: 1 }}
+                      />
+                      <Typography variant="body2" color="text.secondary">
+                        Great job! You've completed today's workout.
+                      </Typography>
+                    </Box>
+                  ) : (
+                    <Box sx={{ mt: 2 }}>
+                      <Button 
+                        variant="contained" 
+                        startIcon={<PlayArrow />}
+                        sx={{ mb: 1 }}
+                      >
+                        Start Workout
+                      </Button>
+                      <Typography variant="body2" color="text.secondary">
+                        Ready to crush today's training session!
+                      </Typography>
+                    </Box>
+                  )}
                 </Box>
               ) : (
-                <Alert severity="info">
-                  Today is a rest day. Focus on recovery and nutrition.
-                </Alert>
+                <Box>
+                  <Typography variant="body1" gutterBottom>
+                    {getToday()} - Rest Day
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Take it easy today. Focus on recovery and nutrition.
+                  </Typography>
+                </Box>
               )}
-            </CardContent>
-          </Card>
-
-          {/* Nutrition Summary */}
-          <Card>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Nutrition Summary
-              </Typography>
-              
-              {targetMacros && macroCompliance ? (
-                <Grid container spacing={2}>
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" gutterBottom>Protein</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>
-                        {macroTotals.protein}g / {targetMacros.protein}g
-                      </Typography>
-                      <Chip 
-                        label={`${Math.round(macroCompliance.protein)}%`}
-                        color={getMacroProgressColor(macroCompliance.protein) as any}
-                        size="small"
-                      />
-                    </Box>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={Math.min(macroCompliance.protein, 100)}
-                      color={getMacroProgressColor(macroCompliance.protein) as any}
-                      sx={{ height: 6, borderRadius: 3 }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" gutterBottom>Carbs</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>
-                        {macroTotals.carbs}g / {targetMacros.carbs}g
-                      </Typography>
-                      <Chip 
-                        label={`${Math.round(macroCompliance.carbs)}%`}
-                        color={getMacroProgressColor(macroCompliance.carbs) as any}
-                        size="small"
-                      />
-                    </Box>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={Math.min(macroCompliance.carbs, 100)}
-                      color={getMacroProgressColor(macroCompliance.carbs) as any}
-                      sx={{ height: 6, borderRadius: 3 }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" gutterBottom>Fat</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>
-                        {macroTotals.fat}g / {targetMacros.fat}g
-                      </Typography>
-                      <Chip 
-                        label={`${Math.round(macroCompliance.fat)}%`}
-                        color={getMacroProgressColor(macroCompliance.fat) as any}
-                        size="small"
-                      />
-                    </Box>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={Math.min(macroCompliance.fat, 100)}
-                      color={getMacroProgressColor(macroCompliance.fat) as any}
-                      sx={{ height: 6, borderRadius: 3 }}
-                    />
-                  </Grid>
-                  
-                  <Grid item xs={12} sm={6}>
-                    <Typography variant="subtitle2" gutterBottom>Fiber</Typography>
-                    <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                      <Typography variant="body2" sx={{ mr: 1 }}>
-                        {macroTotals.fiber}g / {targetMacros.fiber}g
-                      </Typography>
-                      <Chip 
-                        label={`${Math.round(macroCompliance.fiber)}%`}
-                        color={getMacroProgressColor(macroCompliance.fiber) as any}
-                        size="small"
-                      />
-                    </Box>
-                    <LinearProgress 
-                      variant="determinate" 
-                      value={Math.min(macroCompliance.fiber, 100)}
-                      color={getMacroProgressColor(macroCompliance.fiber) as any}
-                      sx={{ height: 6, borderRadius: 3 }}
-                    />
-                  </Grid>
-                </Grid>
-              ) : (
-                <Typography variant="body2" color="text.secondary">
-                  No nutrition data available for today.
-                </Typography>
-              )}
-              
-              <Box sx={{ mt: 2 }}>
-                <Button 
-                  variant="outlined" 
-                  onClick={() => navigate('/nutrition')}
-                  startIcon={<Restaurant />}
-                >
-                  Log Nutrition
-                </Button>
-              </Box>
             </CardContent>
           </Card>
         </Grid>
 
-        {/* Right Column */}
-        <Grid item xs={12} lg={4}>
-          {/* Quick Actions */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Quick Actions
-              </Typography>
-              <List dense>
-                <ListItem button onClick={() => navigate('/workout')}>
-                  <ListItemIcon>
-                    <FitnessCenter />
-                  </ListItemIcon>
-                  <ListItemText primary="Start Workout" />
-                </ListItem>
-                <ListItem button onClick={() => navigate('/nutrition')}>
-                  <ListItemIcon>
-                    <Restaurant />
-                  </ListItemIcon>
-                  <ListItemText primary="Log Nutrition" />
-                </ListItem>
-                <ListItem button onClick={() => navigate('/progress')}>
-                  <ListItemIcon>
-                    <TrendingUp />
-                  </ListItemIcon>
-                  <ListItemText primary="Update Progress" />
-                </ListItem>
-                <ListItem button onClick={() => navigate('/training')}>
-                  <ListItemIcon>
-                    <Schedule />
-                  </ListItemIcon>
-                  <ListItemText primary="View Training Plan" />
-                </ListItem>
-              </List>
-            </CardContent>
-          </Card>
-
-          {/* Phase Info */}
-          <Card sx={{ mb: 3 }}>
-            <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Current Phase
-              </Typography>
-              <Typography variant="subtitle1" gutterBottom>
-                {currentPhase.name}
-              </Typography>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {currentPhase.duration} weeks • {currentPhase.focus.replace('_', ' ')}
-              </Typography>
-              
-              <Box sx={{ mb: 2 }}>
-                <Typography variant="body2" gutterBottom>
-                  Target Weight: {currentPhase.targetWeight} lbs
-                </Typography>
-                <Typography variant="body2" gutterBottom>
-                  Target Body Fat: {currentPhase.targetBodyFat}%
-                </Typography>
-                <Typography variant="body2">
-                  Cardio: {currentPhase.cardioPlan.frequency}x/week, {currentPhase.cardioPlan.duration}min
-                </Typography>
-              </Box>
-              
-              <Button 
-                variant="outlined" 
-                size="small"
-                onClick={() => navigate('/training')}
-              >
-                View Details
-              </Button>
-            </CardContent>
-          </Card>
-
-          {/* Today's Meals */}
+        {/* Nutrition Status */}
+        <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
-              <Typography variant="h6" sx={{ fontWeight: 600, mb: 2 }}>
-                Today's Meals
-              </Typography>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                <Restaurant sx={{ mr: 1, color: 'success.main' }} />
+                <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                  Today's Nutrition
+                </Typography>
+              </Box>
               
-              {todayNutrition.length > 0 ? (
-                <List dense>
-                  {todayNutrition.map((entry, index) => (
-                    <ListItem key={entry.id}>
-                      <ListItemIcon>
-                        <Restaurant fontSize="small" />
-                      </ListItemIcon>
-                      <ListItemText 
-                        primary={entry.meal}
-                        secondary={`${entry.totalCalories} cal`}
-                      />
-                    </ListItem>
-                  ))}
-                </List>
+              {targetMacros ? (
+                <Box>
+                  <Typography variant="body2" gutterBottom>
+                    Target: {targetMacros.calories} kcal
+                  </Typography>
+                  <Typography variant="body2" gutterBottom>
+                    Current: {macroTotals.calories} kcal
+                  </Typography>
+                  
+                  <Box sx={{ mt: 2 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2">Protein</Typography>
+                      <Typography variant="body2">
+                        {macroTotals.protein_g}g / {targetMacros.protein_g}g
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={getMacroProgress(macroTotals.protein_g, targetMacros.protein_g)}
+                      color={getMacroColor(getMacroProgress(macroTotals.protein_g, targetMacros.protein_g))}
+                      sx={{ height: 8, borderRadius: 4 }}
+                    />
+                  </Box>
+                  
+                  <Box sx={{ mt: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2">Carbs</Typography>
+                      <Typography variant="body2">
+                        {macroTotals.carbs_g}g / {targetMacros.carbs_g}g
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={getMacroProgress(macroTotals.carbs_g, targetMacros.carbs_g)}
+                      color={getMacroColor(getMacroProgress(macroTotals.carbs_g, targetMacros.carbs_g))}
+                      sx={{ height: 8, borderRadius: 4 }}
+                    />
+                  </Box>
+                  
+                  <Box sx={{ mt: 1 }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                      <Typography variant="body2">Fat</Typography>
+                      <Typography variant="body2">
+                        {macroTotals.fat_g}g / {targetMacros.fat_g}g
+                      </Typography>
+                    </Box>
+                    <LinearProgress
+                      variant="determinate"
+                      value={getMacroProgress(macroTotals.fat_g, targetMacros.fat_g)}
+                      color={getMacroColor(getMacroProgress(macroTotals.fat_g, targetMacros.fat_g))}
+                      sx={{ height: 8, borderRadius: 4 }}
+                    />
+                  </Box>
+                </Box>
               ) : (
                 <Typography variant="body2" color="text.secondary">
-                  No meals logged today.
+                  Set up your training phase to see macro targets.
                 </Typography>
               )}
-              
-              <Box sx={{ mt: 2 }}>
-                <Button 
-                  variant="outlined" 
-                  size="small"
-                  onClick={() => navigate('/nutrition')}
-                >
-                  Add Meal
-                </Button>
-              </Box>
             </CardContent>
           </Card>
         </Grid>
       </Grid>
+
+      {/* Recent Progress */}
+      {latestProgress && (
+        <Card sx={{ mb: 4 }}>
+          <CardContent>
+            <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+              Latest Progress Update
+            </Typography>
+            <Grid container spacing={2}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">Weight</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {latestProgress.weight} kg
+                  </Typography>
+                </Box>
+              </Grid>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box>
+                  <Typography variant="body2" color="text.secondary">Body Fat</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                    {latestProgress.bodyFatPercentage}%
+                  </Typography>
+                </Box>
+              </Grid>
+              {latestProgress.strengthLifts?.benchPress && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">Bench</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {latestProgress.strengthLifts.benchPress} kg
+                    </Typography>
+                  </Box>
+                </Grid>
+              )}
+              {latestProgress.strengthLifts?.squat && (
+                <Grid item xs={12} sm={6} md={3}>
+                  <Box>
+                    <Typography variant="body2" color="text.secondary">Squat</Typography>
+                    <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                      {latestProgress.strengthLifts.squat} kg
+                    </Typography>
+                  </Box>
+                </Grid>
+              )}
+            </Grid>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Quick Actions */}
+      <Card>
+        <CardContent>
+          <Typography variant="h6" gutterBottom sx={{ fontWeight: 600 }}>
+            Quick Actions
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<FitnessCenter />}
+                sx={{ py: 2 }}
+              >
+                Log Workout
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<Restaurant />}
+                sx={{ py: 2 }}
+              >
+                Log Meal
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<Bedtime />}
+                sx={{ py: 2 }}
+              >
+                Log Sleep
+              </Button>
+            </Grid>
+            <Grid item xs={12} sm={6} md={3}>
+              <Button
+                variant="outlined"
+                fullWidth
+                startIcon={<TrendingUp />}
+                sx={{ py: 2 }}
+              >
+                Update Progress
+              </Button>
+            </Grid>
+          </Grid>
+        </CardContent>
+      </Card>
     </Box>
   );
 };

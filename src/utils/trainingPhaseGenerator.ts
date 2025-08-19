@@ -29,14 +29,15 @@ export function generatePhase1(userProfile: UserProfile): TrainingPhase {
     targetBodyFat: 14,
     focus: 'lean_recomp',
     trainingSplit,
+    createdAt: new Date(),
     nutritionPlan: {
       targetCalories: 2650,
       macros: {
-        protein: 200,
-        carbs: 250,
-        fat: 70,
-        fiber: 35,
-        sodium: 2100
+        protein_g: 200,
+        carbs_g: 250,
+        fat_g: 70,
+        fiber_g: 35,
+        sodium_mg: 2100
       },
       mealTiming: {
         preWorkout: 90,
@@ -54,13 +55,13 @@ export function generatePhase1(userProfile: UserProfile): TrainingPhase {
       supplements: [
         {
           name: 'Creatine Monohydrate',
-          dosage: '5g daily',
+          dose: '5g daily',
           timing: 'Any time',
           purpose: 'Strength and power output'
         },
         {
           name: 'Whey Protein',
-          dosage: '30g post-workout',
+          dose: '30g post-workout',
           timing: 'Within 30 minutes',
           purpose: 'Muscle protein synthesis'
         }
@@ -105,14 +106,15 @@ export function generatePhase2(userProfile: UserProfile): TrainingPhase {
     targetBodyFat: 16,
     focus: 'muscle_gain',
     trainingSplit,
+    createdAt: new Date(),
     nutritionPlan: {
       targetCalories: 2900,
       macros: {
-        protein: 220,
-        carbs: 320,
-        fat: 65,
-        fiber: 40,
-        sodium: 2300
+        protein_g: 220,
+        carbs_g: 320,
+        fat_g: 65,
+        fiber_g: 40,
+        sodium_mg: 2300
       },
       mealTiming: {
         preWorkout: 120,
@@ -130,19 +132,19 @@ export function generatePhase2(userProfile: UserProfile): TrainingPhase {
       supplements: [
         {
           name: 'Creatine Monohydrate',
-          dosage: '5g daily',
+          dose: '5g daily',
           timing: 'Any time',
           purpose: 'Strength and power output'
         },
         {
           name: 'Whey Protein',
-          dosage: '40g post-workout',
+          dose: '40g post-workout',
           timing: 'Within 30 minutes',
           purpose: 'Muscle protein synthesis'
         },
         {
           name: 'BCAAs',
-          dosage: '10g during workout',
+          dose: '10g during workout',
           timing: 'During training',
           purpose: 'Muscle preservation'
         }
@@ -187,14 +189,15 @@ export function generatePhase3(userProfile: UserProfile): TrainingPhase {
     targetBodyFat: 12,
     focus: 'final_cut',
     trainingSplit,
+    createdAt: new Date(),
     nutritionPlan: {
       targetCalories: 2200,
       macros: {
-        protein: 240,
-        carbs: 180,
-        fat: 75,
-        fiber: 30,
-        sodium: 2000
+        protein_g: 240,
+        carbs_g: 180,
+        fat_g: 75,
+        fiber_g: 30,
+        sodium_mg: 2000
       },
       mealTiming: {
         preWorkout: 60,
@@ -212,19 +215,19 @@ export function generatePhase3(userProfile: UserProfile): TrainingPhase {
       supplements: [
         {
           name: 'Creatine Monohydrate',
-          dosage: '5g daily',
+          dose: '5g daily',
           timing: 'Any time',
           purpose: 'Maintain strength during deficit'
         },
         {
           name: 'Whey Protein',
-          dosage: '35g post-workout',
+          dose: '35g post-workout',
           timing: 'Within 30 minutes',
           purpose: 'Muscle protein synthesis'
         },
         {
           name: 'Caffeine',
-          dosage: '200mg pre-workout',
+          dose: '200mg pre-workout',
           timing: '30 minutes before',
           purpose: 'Fat oxidation and performance'
         }
@@ -448,7 +451,7 @@ function selectExercises(
 ): Exercise[] {
   const filtered = availableExercises.filter(exercise => 
     exercise.category === category && 
-    exercise.muscleGroups.some(mg => muscleGroups.includes(mg))
+    exercise.muscle_group.some(mg => muscleGroups.indexOf(mg) !== -1)
   );
   
   // Shuffle and select

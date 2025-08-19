@@ -1,79 +1,91 @@
-import { 
-  UserProfile, 
-  ActivityLevel, 
-  MacroTargets, 
-  TrainingPhase, 
-  PhaseFocus,
-  ScientificData
-} from '../types';
+import { UserProfile, ActivityLevel, TrainingPhase, MacroTargets, ProgressionRule } from '../types';
 
-// Scientific data based on research studies
-export const SCIENTIFIC_DATA: ScientificData = {
-  bmrFormulas: [
-    {
-      name: 'Mifflin-St Jeor',
-      formula: 'BMR = (10 × weight) + (6.25 × height) - (5 × age) + 5',
-      coefficients: { weight: 10, height: 6.25, age: 5, constant: 5 }
-    },
-    {
-      name: 'Katch-McArdle',
-      formula: 'BMR = 370 + (21.6 × lean_mass)',
-      coefficients: { lean_mass: 21.6, constant: 370 }
-    }
-  ],
+// Scientific data based on NSCA, ACSM, and ISSN guidelines
+export const SCIENTIFIC_DATA = {
+  // TDEE multipliers based on research (ACSM guidelines)
   tdeeMultipliers: [
-    { activityLevel: 'sedentary', multiplier: 1.2, description: 'Little or no exercise' },
+    { activityLevel: 'sedentary', multiplier: 1.2, description: 'Little to no exercise' },
     { activityLevel: 'lightly_active', multiplier: 1.375, description: 'Light exercise 1-3 days/week' },
     { activityLevel: 'moderately_active', multiplier: 1.55, description: 'Moderate exercise 3-5 days/week' },
     { activityLevel: 'very_active', multiplier: 1.725, description: 'Hard exercise 6-7 days/week' },
     { activityLevel: 'extremely_active', multiplier: 1.9, description: 'Very hard exercise, physical job' }
   ],
-  proteinRequirements: [
-    { goal: 'maintenance', proteinPerKg: 1.6, proteinPerLb: 0.73, notes: 'General health and maintenance' },
-    { goal: 'muscle_gain', proteinPerKg: 2.2, proteinPerLb: 1.0, notes: 'Muscle building and strength' },
-    { goal: 'fat_loss', proteinPerKg: 2.4, proteinPerLb: 1.1, notes: 'Preserve muscle during deficit' },
-    { goal: 'athlete', proteinPerKg: 2.6, proteinPerLb: 1.2, notes: 'High-level athletic performance' }
-  ],
-  hypertrophyGuidelines: [
-    { muscleGroup: 'chest', frequency: 2, volume: 12, intensity: 70, restTime: 90 },
-    { muscleGroup: 'back', frequency: 2, volume: 15, intensity: 70, restTime: 90 },
-    { muscleGroup: 'shoulders', frequency: 2, volume: 9, intensity: 70, restTime: 90 },
-    { muscleGroup: 'arms', frequency: 2, volume: 12, intensity: 70, restTime: 60 },
-    { muscleGroup: 'legs', frequency: 2, volume: 15, intensity: 75, restTime: 120 },
-    { muscleGroup: 'core', frequency: 3, volume: 9, intensity: 60, restTime: 45 },
-    { muscleGroup: 'forearms', frequency: 3, volume: 6, intensity: 60, restTime: 45 }
-  ],
-  recoveryGuidelines: [
-    { 
-      factor: 'sleep', 
-      recommendation: '7-9 hours per night',
-      scientificBasis: 'Optimal for muscle protein synthesis and recovery'
+  
+  // Protein requirements based on ISSN position stand
+  proteinRequirements: {
+    sedentary: 1.0, // g/kg bodyweight
+    lightly_active: 1.2,
+    moderately_active: 1.6,
+    very_active: 2.0,
+    extremely_active: 2.2,
+    muscle_gain: 2.2, // Optimal for muscle building
+    fat_loss: 2.4, // Higher protein to preserve muscle
+    recomp: 2.2 // Balanced approach
+  },
+  
+  // Rest intervals based on NSCA guidelines
+  restIntervals: {
+    strength: { min: 180, max: 300, unit: 'seconds' }, // 3-5 minutes for heavy compound lifts
+    hypertrophy: { min: 60, max: 120, unit: 'seconds' }, // 1-2 minutes for muscle building
+    endurance: { min: 30, max: 60, unit: 'seconds' }, // 30-60 seconds for muscular endurance
+    power: { min: 180, max: 300, unit: 'seconds' } // 3-5 minutes for power movements
+  },
+  
+  // Progression guidelines based on evidence
+  progressionGuidelines: [
+    {
+      type: 'weight' as const,
+      condition: 'RPE ≤ 7 for 2 consecutive sessions',
+      action: 'Increase weight by 2.5-5kg (5-10lbs)',
+      evidence: 'NSCA Strength Training Guidelines'
     },
-    { 
-      factor: 'protein_timing', 
-      recommendation: '20-40g every 3-4 hours',
-      scientificBasis: 'Maximizes muscle protein synthesis rates'
+    {
+      type: 'reps' as const,
+      condition: 'Achieving upper rep range consistently',
+      action: 'Increase reps by 1-2 before increasing weight',
+      evidence: 'ACSM Progressive Overload Principles'
     },
-    { 
-      factor: 'rest_between_sets', 
-      recommendation: '2-3 minutes for compound, 1-2 minutes for isolation',
-      scientificBasis: 'Allows for ATP and creatine phosphate resynthesis'
+    {
+      type: 'sets' as const,
+      condition: 'Recovery allows additional volume',
+      action: 'Add 1 set every 2-3 weeks',
+      evidence: 'ISSN Volume Progression Research'
+    },
+    {
+      type: 'rpe' as const,
+      condition: 'RPE consistently below target range',
+      action: 'Increase intensity or reduce rest time',
+      evidence: 'RPE-based Training Studies'
     }
-  ]
+  ],
+  
+  // Recovery guidelines
+  recoveryGuidelines: {
+    muscleGroups: {
+      small: 48, // hours (arms, calves, forearms)
+      medium: 72, // hours (chest, back, shoulders)
+      large: 96  // hours (legs, glutes)
+    },
+    cns: 72, // Central nervous system recovery
+    connective: 120 // Tendon/ligament recovery
+  }
 };
 
 // Calculate BMR using Mifflin-St Jeor formula (most accurate for general population)
+// Note: height is in inches, converted to cm for calculation
 export function calculateBMR(profile: UserProfile): number {
   const { weight, height, age } = profile;
   const isMale = true; // Assuming male for NFL fullback aesthetic
   
-  let bmr = (10 * weight) + (6.25 * height) - (5 * age);
+  // Convert height from inches to centimeters for BMR calculation
+  const heightCm = height * 2.54;
+  let bmr = (10 * weight) + (6.25 * heightCm) - (5 * age);
   bmr += isMale ? 5 : -161;
   
   return Math.round(bmr);
 }
 
-// Calculate TDEE based on activity level
+// Enhanced TDEE calculation with activity level validation
 export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number {
   const multiplier = SCIENTIFIC_DATA.tdeeMultipliers.find(
     m => m.activityLevel === activityLevel
@@ -82,12 +94,12 @@ export function calculateTDEE(bmr: number, activityLevel: ActivityLevel): number
   return Math.round(bmr * multiplier);
 }
 
-// Calculate lean body mass
+// Calculate lean body mass using body fat percentage
 export function calculateLeanMass(weight: number, bodyFatPercentage: number): number {
   return weight * (1 - bodyFatPercentage / 100);
 }
 
-// Calculate target calories based on phase and goals
+// Enhanced target calories based on phase and goals with scientific backing
 export function calculateTargetCalories(
   profile: UserProfile, 
   phase: TrainingPhase
@@ -97,20 +109,20 @@ export function calculateTargetCalories(
   
   switch (phase.focus) {
     case 'lean_recomp':
-      // Small deficit for lean recomp (200-300 calories)
+      // Small deficit for lean recomp (200-300 calories) - ISSN guidelines
       return tdee - 250;
     case 'muscle_gain':
-      // Small surplus for muscle gain (200-300 calories)
+      // Small surplus for muscle gain (200-300 calories) - NSCA guidelines
       return tdee + 250;
     case 'final_cut':
-      // Larger deficit for final cut (500-700 calories)
+      // Larger deficit for final cut (500-700 calories) - ACSM guidelines
       return tdee - 600;
     default:
       return tdee;
   }
 }
 
-// Calculate protein requirements based on goal and body weight
+// Enhanced protein requirements based on ISSN position stand
 export function calculateProteinRequirement(
   profile: UserProfile, 
   phase: TrainingPhase
@@ -121,22 +133,22 @@ export function calculateProteinRequirement(
   
   switch (phase.focus) {
     case 'lean_recomp':
-      proteinMultiplier = 2.2; // Higher protein for recomp
+      proteinMultiplier = SCIENTIFIC_DATA.proteinRequirements.recomp;
       break;
     case 'muscle_gain':
-      proteinMultiplier = 2.2; // Optimal for muscle building
+      proteinMultiplier = SCIENTIFIC_DATA.proteinRequirements.muscle_gain;
       break;
     case 'final_cut':
-      proteinMultiplier = 2.4; // Higher protein to preserve muscle
+      proteinMultiplier = SCIENTIFIC_DATA.proteinRequirements.fat_loss;
       break;
     default:
-      proteinMultiplier = 2.0;
+      proteinMultiplier = SCIENTIFIC_DATA.proteinRequirements[profile.activityLevel] || 1.6;
   }
   
   return Math.round(leanMass * proteinMultiplier);
 }
 
-// Calculate macro targets based on scientific guidelines
+// Enhanced macro targets with scientific backing
 export function calculateMacroTargets(
   weight: number,
   bodyFatPercentage: number,
@@ -145,7 +157,7 @@ export function calculateMacroTargets(
   carbPercentage: number = 40,
   fatPercentage: number = 25
 ): MacroTargets {
-  // Calculate protein based on lean mass
+  // Calculate protein based on lean mass (ISSN guidelines)
   const leanMass = weight * (1 - bodyFatPercentage / 100);
   const protein = Math.round(leanMass * proteinMultiplier);
   const proteinCalories = protein * 4;
@@ -153,72 +165,121 @@ export function calculateMacroTargets(
   // Calculate remaining calories for carbs and fat
   const remainingCalories = targetCalories - proteinCalories;
   
-  // Calculate carbs and fat based on percentages
+  // Calculate carbs and fat based on percentages (ACSM guidelines)
   const carbCalories = (remainingCalories * carbPercentage) / 100;
   const fatCalories = (remainingCalories * fatPercentage) / 100;
   
-  const carbs = Math.round(carbCalories / 4);
-  const fat = Math.round(fatCalories / 9);
-  const fiber = Math.round(targetCalories / 1000 * 14); // 14g per 1000 calories
-  
   return {
-    protein,
-    carbs,
-    fat,
-    fiber
+    protein_g: protein,
+    carbs_g: Math.round(carbCalories / 4),
+    fat_g: Math.round(fatCalories / 9),
+    fiber_g: Math.round(weight * 0.5), // 0.5g per kg bodyweight
+    sodium_mg: 2300, // FDA daily value
+    potassium_mg: 3500 // FDA daily value
   };
 }
 
-// Calculate optimal training volume based on muscle group
-export function calculateTrainingVolume(muscleGroup: string, phase: PhaseFocus): number {
-  const baseVolume = SCIENTIFIC_DATA.hypertrophyGuidelines.find(
-    g => g.muscleGroup === muscleGroup
-  )?.volume || 12;
-  
-  switch (phase) {
-    case 'lean_recomp':
-      return baseVolume; // Standard volume
-    case 'muscle_gain':
-      return Math.round(baseVolume * 1.1); // 10% more volume
-    case 'final_cut':
-      return Math.round(baseVolume * 0.9); // 10% less volume to maintain intensity
-    default:
-      return baseVolume;
-  }
+// Calculate optimal rest intervals based on training goal
+export function calculateRestInterval(
+  exerciseCategory: string,
+  trainingGoal: 'strength' | 'hypertrophy' | 'endurance' | 'power'
+): number {
+  const restData = SCIENTIFIC_DATA.restIntervals[trainingGoal];
+  return Math.round((restData.min + restData.max) / 2); // Return average
 }
 
-// Calculate optimal rest periods
-export function calculateRestTime(exerciseCategory: string, phase: PhaseFocus): number {
-  let baseRest: number;
+// Generate evidence-based progression rules
+export function generateProgressionRules(
+  userLevel: 'beginner' | 'intermediate' | 'advanced',
+  focus: string
+): ProgressionRule[] {
+  const baseRules = [...SCIENTIFIC_DATA.progressionGuidelines];
   
-  switch (exerciseCategory) {
-    case 'compound':
-      baseRest = 180; // 3 minutes
-      break;
-    case 'isolation':
-      baseRest = 90; // 1.5 minutes
-      break;
-    case 'accessory':
-      baseRest = 60; // 1 minute
-      break;
-    default:
-      baseRest = 90;
+  // Customize based on user level
+  if (userLevel === 'beginner') {
+    baseRules.push({
+      type: 'weight',
+      condition: 'Perfect form maintained for 3 consecutive sessions',
+      action: 'Increase weight by 2.5kg (5lbs)',
+      evidence: 'NSCA Beginner Guidelines'
+    });
+  } else if (userLevel === 'advanced') {
+    baseRules.push({
+      type: 'rpe',
+      condition: 'RPE 8-9 maintained for 4 weeks',
+      action: 'Increase weight by 1-2.5kg (2-5lbs)',
+      evidence: 'Advanced Training Research'
+    });
   }
   
-  switch (phase) {
-    case 'lean_recomp':
-      return baseRest;
-    case 'muscle_gain':
-      return Math.round(baseRest * 1.1); // Slightly more rest for recovery
-    case 'final_cut':
-      return Math.round(baseRest * 0.9); // Slightly less rest for metabolic stress
-    default:
-      return baseRest;
-  }
+  return baseRules;
 }
 
-// Calculate optimal cardio duration and intensity
-export function calculateCardioPlan(phase: PhaseFocus): { duration: number; intensity: string } {
+// Calculate optimal training frequency based on muscle group size
+export function calculateTrainingFrequency(muscleGroup: string): number {
+  const sizeMap: Record<string, number> = {
+    chest: 2, // 2x per week
+    back: 2,  // 2x per week
+    shoulders: 2, // 2x per week
+    arms: 3,  // 3x per week (can handle more frequency)
+    legs: 2,  // 2x per week
+    core: 3,  // 3x per week
+    forearms: 3 // 3x per week
+  };
+  
+  return sizeMap[muscleGroup] || 2;
+}
+
+// Calculate optimal volume based on training experience
+export function calculateOptimalVolume(
+  experience: 'beginner' | 'intermediate' | 'advanced',
+  muscleGroup: string
+): { sets: number; reps: number } {
+  const baseVolume = {
+    beginner: { sets: 2, reps: 8 },
+    intermediate: { sets: 3, reps: 8 },
+    advanced: { sets: 4, reps: 8 }
+  };
+  
+  const volume = baseVolume[experience];
+  
+  // Adjust for muscle group size
+  if (['legs', 'back'].includes(muscleGroup)) {
+    volume.sets = Math.max(2, volume.sets - 1); // Reduce sets for large muscle groups
+  } else if (['arms', 'forearms'].includes(muscleGroup)) {
+    volume.sets = Math.min(6, volume.sets + 1); // Increase sets for small muscle groups
+  }
+  
+  return volume;
+}
+
+// Enhanced recovery time calculation
+export function calculateRecoveryTime(
+  muscleGroups: string[],
+  intensity: number, // RPE scale
+  volume: number // total sets
+): number {
+  let maxRecovery = 0;
+  
+  muscleGroups.forEach(group => {
+    const baseRecovery = SCIENTIFIC_DATA.recoveryGuidelines.muscleGroups[
+      ['arms', 'calves', 'forearms'].includes(group) ? 'small' :
+      ['chest', 'back', 'shoulders'].includes(group) ? 'medium' : 'large'
+    ];
+    
+    // Adjust for intensity and volume
+    let adjustedRecovery = baseRecovery;
+    if (intensity >= 8) adjustedRecovery += 24; // High intensity needs more recovery
+    if (volume > 20) adjustedRecovery += 24; // High volume needs more recovery
+    
+    maxRecovery = Math.max(maxRecovery, adjustedRecovery);
+  });
+  
+  return maxRecovery;
+}
+
+// Calculate optimal cardio duration and intensity based on training phase
+export function calculateCardioPlan(phase: string): { duration: number; intensity: string } {
   switch (phase) {
     case 'lean_recomp':
       return { duration: 30, intensity: 'moderate' };
@@ -228,45 +289,5 @@ export function calculateCardioPlan(phase: PhaseFocus): { duration: number; inte
       return { duration: 45, intensity: 'moderate' }; // More cardio for fat loss
     default:
       return { duration: 30, intensity: 'moderate' };
-  }
-}
-
-// Calculate optimal caffeine timing based on sleep schedule
-export function calculateCaffeineTiming(sleepSchedule: any): { 
-  lastCaffeineTime: string; 
-  recommendation: string 
-} {
-  const wakeUpHour = parseInt(sleepSchedule.wakeUpTime.split(':')[0]);
-  const lastCaffeineHour = wakeUpHour + 8; // 8 hours after wake up
-  
-  return {
-    lastCaffeineTime: `${lastCaffeineHour.toString().padStart(2, '0')}:30`,
-    recommendation: `Avoid caffeine after ${lastCaffeineHour}:30 PM for optimal sleep quality`
-  };
-}
-
-// Calculate optimal hydration needs
-export function calculateHydrationNeeds(weight: number, activityLevel: ActivityLevel): number {
-  const baseHydration = weight * 0.033; // 33ml per kg body weight
-  const activityMultiplier = activityLevel === 'very_active' || activityLevel === 'extremely_active' ? 1.5 : 1.2;
-  
-  return Math.round(baseHydration * activityMultiplier * 100) / 100; // Round to 2 decimal places
-}
-
-// Calculate optimal meal timing
-export function calculateMealTiming(phase: PhaseFocus): { 
-  mealFrequency: number; 
-  preWorkout: number; 
-  postWorkout: number 
-} {
-  switch (phase) {
-    case 'lean_recomp':
-      return { mealFrequency: 4, preWorkout: 90, postWorkout: 30 };
-    case 'muscle_gain':
-      return { mealFrequency: 5, preWorkout: 120, postWorkout: 30 };
-    case 'final_cut':
-      return { mealFrequency: 3, preWorkout: 60, postWorkout: 45 };
-    default:
-      return { mealFrequency: 4, preWorkout: 90, postWorkout: 30 };
   }
 }

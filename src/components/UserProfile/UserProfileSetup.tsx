@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Card,
@@ -7,161 +6,126 @@ import {
   Typography,
   TextField,
   Button,
+  Stepper,
+  Step,
+  StepLabel,
+  Grid,
   FormControl,
   InputLabel,
   Select,
   MenuItem,
   Chip,
-  OutlinedInput,
-  FormHelperText,
-  Stepper,
-  Step,
-  StepLabel,
-  Grid,
-  CircularProgress,
-  Autocomplete
+  Avatar,
+  Paper,
+  Alert,
+  LinearProgress,
+  Stack
 } from '@mui/material';
-import { useForm, Controller } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import * as yup from 'yup';
+import {
+  Person,
+  FitnessCenter,
+  Schedule,
+  CheckCircle,
+  ArrowForward,
+  ArrowBack,
+  MonitorWeight,
+  Height,
+  Cake,
+  TrendingUp,
+  Bedtime,
+  WbSunny
+} from '@mui/icons-material';
 import { useAppStore } from '../../store/useAppStore';
-import { UserProfile, Equipment, ActivityLevel } from '../../types';
-
-const steps = ['Basic Info', 'Goals & Physique', 'Body Stats', 'Sleep Schedule'];
-
-const equipmentOptions: { value: Equipment; label: string }[] = [
-  { value: 'dumbbells', label: 'Dumbbells' },
-  { value: 'barbells', label: 'Barbells' },
-  { value: 'machines', label: 'Machines' },
-  { value: 'cables', label: 'Cables' },
-  { value: 'smith_machine', label: 'Smith Machine' },
-  { value: 'treadmill', label: 'Treadmill' },
-  { value: 'bench', label: 'Bench' },
-  { value: 'squat_rack', label: 'Squat Rack' },
-];
-
-const activityLevels: { value: ActivityLevel; label: string; description: string }[] = [
-  { value: 'sedentary', label: 'Sedentary', description: 'Little or no exercise' },
-  { value: 'lightly_active', label: 'Lightly Active', description: 'Light exercise 1-3 days/week' },
-  { value: 'moderately_active', label: 'Moderately Active', description: 'Moderate exercise 3-5 days/week' },
-  { value: 'very_active', label: 'Very Active', description: 'Hard exercise 6-7 days/week' },
-  { value: 'extremely_active', label: 'Extremely Active', description: 'Very hard exercise, physical job' },
-];
-
-const physiqueExamples = [
-  'NFL fullback',
-  'Lean athlete',
-  'Bodybuilder',
-  'Powerlifter',
-  'CrossFit athlete',
-  'Soccer player',
-  'Basketball player',
-  'Swimmer',
-  'Runner',
-  'Custom...'
-];
-
-const validationSchema = yup.object({
-  name: yup.string().required('Name is required').min(2, 'Name must be at least 2 characters'),
-  age: yup.number().required('Age is required').min(16, 'Must be at least 16').max(80, 'Must be under 80'),
-  height: yup.number().required('Height is required').min(48, 'Height must be at least 4 feet').max(96, 'Height must be under 8 feet'),
-  weight: yup.number().required('Weight is required').min(88, 'Weight must be at least 88 lbs').max(440, 'Weight must be under 440 lbs'),
-  bodyFatPercentage: yup.number().required('Body fat % is required').min(5, 'Body fat must be at least 5%').max(40, 'Body fat must be under 40%'),
-
-  targetPhysique: yup.string().required('Target physique is required'),
-  equipment: yup.array().min(1, 'Select at least one piece of equipment').required('Equipment is required'),
-  activityLevel: yup.string().required('Activity level is required'),
-  sleepSchedule: yup.object({
-    wakeUpTime: yup.string().required('Wake up time is required'),
-    bedTime: yup.string().required('Bed time is required'),
-    targetSleepHours: yup.number().required('Target sleep hours is required').min(6, 'Must be at least 6 hours').max(10, 'Must be under 10 hours'),
-  }),
-});
+import { Equipment, ActivityLevel } from '../../types';
 
 const UserProfileSetup: React.FC = () => {
+  const { setUserProfile } = useAppStore();
   const [activeStep, setActiveStep] = useState(0);
-  const [customPhysique, setCustomPhysique] = useState('');
-  const [loading, setLoadingState] = useState(false);
-  const navigate = useNavigate();
-  const { setUserProfile, setError } = useAppStore();
-
-  const {
-    control,
-    handleSubmit,
-    formState: { errors, isValid },
-    watch,
-    trigger,
-    getValues
-  } = useForm<UserProfile>({
-    resolver: yupResolver(validationSchema),
-    mode: 'onChange',
-    defaultValues: {
-      id: '',
-      name: '',
-      age: 25,
-      height: 70, // 5'10" in inches
-      weight: 176, // 176 lbs
-      bodyFatPercentage: 15,
-
-      targetPhysique: '',
-      equipment: [],
-      activityLevel: 'moderately_active',
-      sleepSchedule: {
-        wakeUpTime: '06:00',
-        bedTime: '22:00',
-        targetSleepHours: 8,
-      },
-      createdAt: new Date(),
-      updatedAt: new Date(),
+  const [formData, setFormData] = useState({
+    name: '',
+    age: '',
+    height: '',
+    weight: '',
+    bodyFatPercentage: '',
+    targetPhysique: '',
+    equipment: [] as Equipment[],
+    activityLevel: 'moderately_active' as ActivityLevel,
+    sleepSchedule: {
+      wakeUpTime: '06:00',
+      bedTime: '22:00',
+      targetSleepHours: 8,
+      sleepQuality: 7,
+      sleepTracking: true,
+      sleepNotes: ''
     }
   });
 
-  const watchedValues = watch();
+  const steps = [
+    'Basic Info',
+    'Body Metrics',
+    'Goals & Equipment',
+    'Activity & Sleep',
+    'Review & Complete'
+  ];
 
-  const handleNext = async () => {
-    // For now, just move to the next step
-    setActiveStep((prevStep) => prevStep + 1);
+  const handleNext = () => {
+    if (activeStep === steps.length - 1) {
+      handleSubmit();
+    } else {
+      setActiveStep((prevStep) => prevStep + 1);
+    }
   };
 
   const handleBack = () => {
     setActiveStep((prevStep) => prevStep - 1);
   };
 
-  const getFieldsForStep = (step: number): (keyof UserProfile)[] => {
-    switch (step) {
-      case 0:
-        return ['name', 'age'];
-      case 1:
-        return ['targetPhysique', 'equipment', 'activityLevel'];
-      case 2:
-        return ['height', 'weight', 'bodyFatPercentage'];
-      case 3:
-        return ['sleepSchedule'] as any;
-      default:
-        return [];
+  const handleInputChange = (field: string, value: any) => {
+    if (field.includes('.')) {
+      const [parent, child] = field.split('.');
+      setFormData(prev => ({
+        ...prev,
+        [parent]: {
+          ...(prev as any)[parent],
+          [child]: value
+        }
+      }));
+    } else {
+      setFormData(prev => ({ ...prev, [field]: value }));
     }
   };
 
-  const onSubmit = async (data: UserProfile) => {
-    try {
-      setLoadingState(true);
-      setError(null);
-      
-      const profile: UserProfile = {
-        ...data,
-        id: `user_${Date.now()}`,
-        targetPhysique: data.targetPhysique === 'Custom...' ? customPhysique : data.targetPhysique,
-        goalWeight: data.weight, // Set goal weight to current weight initially
-        createdAt: new Date(),
-        updatedAt: new Date(),
-      };
+  const handleSubmit = () => {
+    const profile = {
+      id: `profile_${Date.now()}`,
+      name: formData.name,
+      age: parseInt(formData.age),
+      height: parseFloat(formData.height),
+      weight: parseFloat(formData.weight),
+      bodyFatPercentage: parseFloat(formData.bodyFatPercentage),
+      targetPhysique: formData.targetPhysique,
+      equipment: formData.equipment,
+      activityLevel: formData.activityLevel,
+      sleepSchedule: formData.sleepSchedule,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    };
 
-      setUserProfile(profile);
-      navigate('/dashboard');
-    } catch (error) {
-      setError('Failed to create profile. Please try again.');
-    } finally {
-      setLoadingState(false);
+    setUserProfile(profile);
+  };
+
+  const isStepValid = (step: number) => {
+    switch (step) {
+      case 0:
+        return formData.name.trim() !== '' && formData.age !== '';
+      case 1:
+        return formData.height !== '' && formData.weight !== '' && formData.bodyFatPercentage !== '';
+      case 2:
+        return formData.targetPhysique !== '' && formData.equipment.length > 0;
+      case 3:
+        return true;
+      default:
+        return false;
     }
   };
 
@@ -169,270 +133,342 @@ const UserProfileSetup: React.FC = () => {
     switch (step) {
       case 0:
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Controller
-                name="name"
-                control={control}
-                render={({ field }) => (
+          <Card>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, bgcolor: 'primary.main' }}>
+                  <Person sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" gutterBottom>
+                  Let's Get Started!
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Tell us about yourself to create your personalized fitness plan
+                </Typography>
+              </Box>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
                   <TextField
-                    {...field}
                     fullWidth
                     label="Full Name"
-                    error={!!errors.name}
-                    helperText={errors.name?.message}
+                    value={formData.name}
+                    onChange={(e) => handleInputChange('name', e.target.value)}
+                    placeholder="Enter your full name"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <Person sx={{ mr: 1, color: 'primary.main' }} />
+                    }}
                   />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="age"
-                control={control}
-                render={({ field }) => (
+                </Grid>
+                <Grid item xs={12} sm={6}>
                   <TextField
-                    {...field}
                     fullWidth
-                    type="number"
                     label="Age"
-                    error={!!errors.age}
-                    helperText={errors.age?.message}
+                    type="number"
+                    value={formData.age}
+                    onChange={(e) => handleInputChange('age', e.target.value)}
+                    placeholder="25"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <Cake sx={{ mr: 1, color: 'primary.main' }} />
+                    }}
                   />
-                )}
-              />
-            </Grid>
-          </Grid>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <FormControl fullWidth>
+                    <InputLabel>Activity Level</InputLabel>
+                    <Select
+                      value={formData.activityLevel}
+                      onChange={(e) => handleInputChange('activityLevel', e.target.value)}
+                      label="Activity Level"
+                    >
+                      <MenuItem value="sedentary">Sedentary (Office job, little exercise)</MenuItem>
+                      <MenuItem value="lightly_active">Lightly Active (Light exercise 1-3 days/week)</MenuItem>
+                      <MenuItem value="moderately_active">Moderately Active (Moderate exercise 3-5 days/week)</MenuItem>
+                      <MenuItem value="very_active">Very Active (Hard exercise 6-7 days/week)</MenuItem>
+                      <MenuItem value="extremely_active">Extremely Active (Very hard exercise, physical job)</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         );
 
       case 1:
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={12}>
-              <Controller
-                name="targetPhysique"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.targetPhysique}>
-                    <InputLabel>Target Physique</InputLabel>
-                    <Select {...field} label="Target Physique">
-                      {physiqueExamples.map((physique) => (
-                        <MenuItem key={physique} value={physique}>
-                          {physique}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errors.targetPhysique && (
-                      <FormHelperText>{errors.targetPhysique.message}</FormHelperText>
-                    )}
-                  </FormControl>
-                )}
-              />
-            </Grid>
-            {watch('targetPhysique') === 'Custom...' && (
-              <Grid item xs={12}>
-                <TextField
-                  fullWidth
-                  label="Custom Physique Goal"
-                  value={customPhysique}
-                  onChange={(e) => setCustomPhysique(e.target.value)}
-                  placeholder="e.g., NFL linebacker, Olympic sprinter, etc."
-                />
+          <Card>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, bgcolor: 'secondary.main' }}>
+                  <MonitorWeight sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" gutterBottom>
+                  Body Metrics
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  These help us calculate your precise nutrition and training needs
+                </Typography>
+              </Box>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Height (inches)"
+                    type="number"
+                    value={formData.height}
+                    onChange={(e) => handleInputChange('height', e.target.value)}
+                    placeholder="175"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <Height sx={{ mr: 1, color: 'secondary.main' }} />
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Weight (kg)"
+                    type="number"
+                    value={formData.weight}
+                    onChange={(e) => handleInputChange('weight', e.target.value)}
+                    placeholder="80"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <MonitorWeight sx={{ mr: 1, color: 'secondary.main' }} />
+                    }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Body Fat Percentage"
+                    type="number"
+                    value={formData.bodyFatPercentage}
+                    onChange={(e) => handleInputChange('bodyFatPercentage', e.target.value)}
+                    placeholder="15"
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <TrendingUp sx={{ mr: 1, color: 'secondary.main' }} />
+                    }}
+                    helperText="Estimate your body fat percentage (10-30%)"
+                  />
+                </Grid>
               </Grid>
-            )}
-            <Grid item xs={12}>
-              <Controller
-                name="equipment"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.equipment}>
-                    <InputLabel>Available Equipment</InputLabel>
-                    <Select
-                      {...field}
-                      multiple
-                      input={<OutlinedInput label="Available Equipment" />}
-                      renderValue={(selected) => (
-                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                          {(Array.isArray(selected) ? selected : []).map((value) => (
-                            <Chip 
-                              key={value} 
-                              label={equipmentOptions.find(opt => opt.value === value)?.label} 
-                              size="small" 
-                            />
-                          ))}
-                        </Box>
-                      )}
-                    >
-                      {equipmentOptions.map((option) => (
-                        <MenuItem key={option.value} value={option.value}>
-                          {option.label}
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errors.equipment && (
-                      <FormHelperText>{errors.equipment.message}</FormHelperText>
-                    )}
-                  </FormControl>
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Controller
-                name="activityLevel"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth error={!!errors.activityLevel}>
-                    <InputLabel>Activity Level</InputLabel>
-                    <Select {...field} label="Activity Level">
-                      {activityLevels.map((level) => (
-                        <MenuItem key={level.value} value={level.value}>
-                          <Box>
-                            <Typography variant="body1">{level.label}</Typography>
-                            <Typography variant="caption" color="text.secondary">
-                              {level.description}
-                            </Typography>
-                          </Box>
-                        </MenuItem>
-                      ))}
-                    </Select>
-                    {errors.activityLevel && (
-                      <FormHelperText>{errors.activityLevel.message}</FormHelperText>
-                    )}
-                  </FormControl>
-                )}
-              />
-            </Grid>
-          </Grid>
+            </CardContent>
+          </Card>
         );
 
       case 2:
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="height"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="number"
-                    label="Height (inches)"
-                    placeholder="e.g., 70 for 5'10 inches"
-                    error={!!errors.height}
-                    helperText={errors.height?.message || "Enter height in inches (e.g., 70 for 5'10 inches)"}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="weight"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="number"
-                    label="Current Weight (lbs)"
-                    error={!!errors.weight}
-                    helperText={errors.weight?.message}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="bodyFatPercentage"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
-                    type="number"
-                    label="Body Fat %"
-                    error={!!errors.bodyFatPercentage}
-                    helperText={errors.bodyFatPercentage?.message}
-                  />
-                )}
-              />
-            </Grid>
-          </Grid>
+          <Card>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, bgcolor: 'success.main' }}>
+                  <FitnessCenter sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" gutterBottom>
+                  Goals & Equipment
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  What's your target physique and what equipment do you have access to?
+                </Typography>
+              </Box>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>Target Physique</InputLabel>
+                    <Select
+                      value={formData.targetPhysique}
+                      onChange={(e) => handleInputChange('targetPhysique', e.target.value)}
+                      label="Target Physique"
+                    >
+                      <MenuItem value="NFL fullback">NFL Fullback Build</MenuItem>
+                      <MenuItem value="lean athlete">Lean Athlete</MenuItem>
+                      <MenuItem value="powerlifter">Powerlifter</MenuItem>
+                      <MenuItem value="bodybuilder">Bodybuilder</MenuItem>
+                      <MenuItem value="general fitness">General Fitness</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
+                
+                <Grid item xs={12}>
+                  <Typography variant="h6" gutterBottom>
+                    Available Equipment
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                    Select all equipment you have access to:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {(['dumbbells', 'barbells', 'machines', 'cables', 'smith_machine', 'treadmill', 'bench', 'squat_rack'] as Equipment[]).map((equipment) => (
+                      <Chip
+                        key={equipment}
+                        label={equipment.replace('_', ' ')}
+                        onClick={() => {
+                          const newEquipment = formData.equipment.includes(equipment)
+                            ? formData.equipment.filter(e => e !== equipment)
+                            : [...formData.equipment, equipment];
+                          handleInputChange('equipment', newEquipment);
+                        }}
+                        color={formData.equipment.includes(equipment) ? 'primary' : 'default'}
+                        variant={formData.equipment.includes(equipment) ? 'filled' : 'outlined'}
+                        icon={formData.equipment.includes(equipment) ? <CheckCircle /> : undefined}
+                      />
+                    ))}
+                  </Box>
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
         );
 
       case 3:
         return (
-          <Grid container spacing={3}>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="sleepSchedule.wakeUpTime"
-                control={control}
-                render={({ field }) => (
+          <Card>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, bgcolor: 'info.main' }}>
+                  <Schedule sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" gutterBottom>
+                  Activity & Sleep
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Help us optimize your recovery and daily routine
+                </Typography>
+              </Box>
+              
+              <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
                   <TextField
-                    {...field}
                     fullWidth
-                    type="time"
                     label="Wake Up Time"
-                    error={!!errors.sleepSchedule?.wakeUpTime}
-                    helperText={errors.sleepSchedule?.wakeUpTime?.message}
-                    InputLabelProps={{ shrink: true }}
-                  />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="sleepSchedule.bedTime"
-                control={control}
-                render={({ field }) => (
-                  <TextField
-                    {...field}
-                    fullWidth
                     type="time"
-                    label="Bed Time"
-                    error={!!errors.sleepSchedule?.bedTime}
-                    helperText={errors.sleepSchedule?.bedTime?.message}
-                    InputLabelProps={{ shrink: true }}
+                    value={formData.sleepSchedule.wakeUpTime}
+                    onChange={(e) => handleInputChange('sleepSchedule.wakeUpTime', e.target.value)}
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <WbSunny sx={{ mr: 1, color: 'info.main' }} />
+                    }}
                   />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="sleepSchedule.targetSleepHours"
-                control={control}
-                render={({ field }) => (
+                </Grid>
+                <Grid item xs={12} sm={6}>
                   <TextField
-                    {...field}
                     fullWidth
-                    type="number"
-                    label="Target Sleep Hours"
-                    error={!!errors.sleepSchedule?.targetSleepHours}
-                    helperText={errors.sleepSchedule?.targetSleepHours?.message}
+                    label="Bed Time"
+                    type="time"
+                    value={formData.sleepSchedule.bedTime}
+                    onChange={(e) => handleInputChange('sleepSchedule.bedTime', e.target.value)}
+                    variant="outlined"
+                    InputProps={{
+                      startAdornment: <Bedtime sx={{ mr: 1, color: 'info.main' }} />
+                    }}
                   />
-                )}
-              />
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Controller
-                name="sleepSchedule.sleepTracking"
-                control={control}
-                render={({ field }) => (
-                  <FormControl fullWidth>
-                    <InputLabel>Sleep Quality Tracking</InputLabel>
-                    <Select {...field} label="Sleep Quality Tracking">
-                      <MenuItem value="true">Enable Sleep Tracking</MenuItem>
-                      <MenuItem value="false">Disable Sleep Tracking</MenuItem>
-                    </Select>
-                  </FormControl>
-                )}
-              />
-            </Grid>
-            <Grid item xs={12}>
-              <Typography variant="body2" color="text.secondary" sx={{ mt: 2 }}>
-                💡 Sleep tracking will help you monitor sleep quality, stress levels, and optimize recovery for better performance.
-              </Typography>
-            </Grid>
-          </Grid>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Target Sleep Hours"
+                    type="number"
+                    value={formData.sleepSchedule.targetSleepHours}
+                    onChange={(e) => handleInputChange('sleepSchedule.targetSleepHours', parseInt(e.target.value))}
+                    placeholder="8"
+                    variant="outlined"
+                    inputProps={{ min: 6, max: 12 }}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    label="Sleep Quality (1-10)"
+                    type="number"
+                    value={formData.sleepSchedule.sleepQuality}
+                    onChange={(e) => handleInputChange('sleepSchedule.sleepQuality', parseInt(e.target.value))}
+                    placeholder="7"
+                    variant="outlined"
+                    inputProps={{ min: 1, max: 10 }}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <TextField
+                    fullWidth
+                    label="Sleep Notes (Optional)"
+                    multiline
+                    rows={3}
+                    value={formData.sleepSchedule.sleepNotes}
+                    onChange={(e) => handleInputChange('sleepSchedule.sleepNotes', e.target.value)}
+                    placeholder="Any sleep issues, patterns, or preferences..."
+                    variant="outlined"
+                  />
+                </Grid>
+              </Grid>
+            </CardContent>
+          </Card>
+        );
+
+      case 4:
+        return (
+          <Card>
+            <CardContent>
+              <Box sx={{ textAlign: 'center', mb: 4 }}>
+                <Avatar sx={{ width: 80, height: 80, mx: 'auto', mb: 2, bgcolor: 'success.main' }}>
+                  <CheckCircle sx={{ fontSize: 40 }} />
+                </Avatar>
+                <Typography variant="h5" gutterBottom>
+                  Review Your Profile
+                </Typography>
+                <Typography variant="body1" color="text.secondary">
+                  Everything looks great! Let's create your personalized fitness plan
+                </Typography>
+              </Box>
+              
+              <Paper sx={{ p: 3, mb: 3, bgcolor: 'grey.50' }}>
+                <Grid container spacing={2}>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Name</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{formData.name}</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Age</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{formData.age} years</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Height</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{formData.height} inches</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Weight</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{formData.weight} kg</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Body Fat</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{formData.bodyFatPercentage}%</Typography>
+                  </Grid>
+                  <Grid item xs={12} sm={6}>
+                    <Typography variant="subtitle2" color="text.secondary">Target Physique</Typography>
+                    <Typography variant="body1" sx={{ fontWeight: 'bold' }}>{formData.targetPhysique}</Typography>
+                  </Grid>
+                  <Grid item xs={12}>
+                    <Typography variant="subtitle2" color="text.secondary">Equipment</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+                      {formData.equipment.map((eq) => (
+                        <Chip key={eq} label={eq.replace('_', ' ')} color="primary" size="small" />
+                      ))}
+                    </Box>
+                  </Grid>
+                </Grid>
+              </Paper>
+              
+              <Alert severity="info" sx={{ mb: 3 }}>
+                <Typography variant="body2">
+                  <strong>Next:</strong> We'll generate your personalized training program, nutrition plan, and cardio strategy based on your goals and equipment!
+                </Typography>
+              </Alert>
+            </CardContent>
+          </Card>
         );
 
       default:
@@ -441,100 +477,73 @@ const UserProfileSetup: React.FC = () => {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: '100vh',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        p: { xs: 1, sm: 2 },
-        background: 'linear-gradient(135deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%)',
-      }}
-    >
-      <Card sx={{ 
-        maxWidth: 800, 
-        width: '100%',
-        background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)',
-        border: '1px solid rgba(255,255,255,0.05)',
-        boxShadow: '0 16px 64px rgba(0,0,0,0.4)'
-      }}>
-        <CardContent sx={{ p: { xs: 3, sm: 4 } }}>
-          <Typography variant="h4" align="center" gutterBottom sx={{ fontWeight: 600 }}>
-            Welcome to Phase Fitness
+    <Box sx={{ p: { xs: 2, md: 3 } }}>
+      {/* Header */}
+      <Card sx={{ mb: 3 }}>
+        <CardContent sx={{ textAlign: 'center' }}>
+          <Typography variant="h3" gutterBottom>
+            SciOptimal Profile Setup
           </Typography>
-          <Typography variant="body1" align="center" color="text.secondary" sx={{ mb: 4 }}>
-            Let's create your personalized training program
+          <Typography variant="h6" color="text.secondary">
+            Let's create your personalized fitness journey
           </Typography>
-
-          <Stepper activeStep={activeStep} sx={{ mb: 4 }}>
-            {steps.map((label) => (
-              <Step key={label}>
-                <StepLabel>{label}</StepLabel>
-              </Step>
-            ))}
-          </Stepper>
-
-          <form onSubmit={handleSubmit(onSubmit)}>
-            <Box sx={{ mb: 4 }}>
-              {renderStepContent(activeStep)}
-            </Box>
-
-            <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
-              <Button
-                disabled={activeStep === 0}
-                onClick={handleBack}
-                variant="outlined"
-              >
-                Back
-              </Button>
-              
-              <Box>
-                {activeStep === steps.length - 1 ? (
-                  <Button
-                    type="submit"
-                    variant="contained"
-                    size="large"
-                    disabled={!isValid || loading}
-                    startIcon={loading ? <CircularProgress size={20} /> : null}
-                    sx={{
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
-                      color: '#000000',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)',
-                      },
-                      '&:disabled': {
-                        background: 'rgba(255,255,255,0.3)',
-                        color: 'rgba(0,0,0,0.5)',
-                      },
-                    }}
-                  >
-                    {loading ? 'Creating Profile...' : 'Create Profile'}
-                  </Button>
-                ) : (
-                  <Button
-                    variant="contained"
-                    onClick={handleNext}
-                    disabled={false}
-                    sx={{
-                      background: 'linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%)',
-                      color: '#000000',
-                      '&:hover': {
-                        background: 'linear-gradient(135deg, #f0f0f0 0%, #e0e0e0 100%)',
-                      },
-                      '&:disabled': {
-                        background: 'rgba(255,255,255,0.3)',
-                        color: 'rgba(0,0,0,0.5)',
-                      },
-                    }}
-                  >
-                    Next
-                  </Button>
-                )}
-              </Box>
-            </Box>
-          </form>
         </CardContent>
       </Card>
+
+      {/* Progress Bar */}
+      <Box sx={{ mb: 3 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+          <Typography variant="body2" color="text.secondary">
+            Step {activeStep + 1} of {steps.length}
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            {Math.round(((activeStep + 1) / steps.length) * 100)}% Complete
+          </Typography>
+        </Box>
+        <LinearProgress 
+          variant="determinate" 
+          value={((activeStep + 1) / steps.length) * 100} 
+          sx={{ height: 8, borderRadius: 4 }}
+        />
+      </Box>
+
+      {/* Stepper */}
+      <Paper sx={{ p: 2, mb: 3 }}>
+        <Stepper activeStep={activeStep} alternativeLabel>
+          {steps.map((label, index) => (
+            <Step key={label}>
+              <StepLabel>{label}</StepLabel>
+            </Step>
+          ))}
+        </Stepper>
+      </Paper>
+
+      {/* Step Content */}
+      {renderStepContent(activeStep)}
+
+      {/* Navigation */}
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', mt: 3 }}>
+        <Button
+          disabled={activeStep === 0}
+          onClick={handleBack}
+          startIcon={<ArrowBack />}
+          variant="outlined"
+          size="large"
+        >
+          Back
+        </Button>
+        
+        <Button
+          variant="contained"
+          onClick={handleNext}
+          endIcon={activeStep === steps.length - 1 ? <CheckCircle /> : <ArrowForward />}
+          size="large"
+          disabled={!isStepValid(activeStep)}
+          color={activeStep === steps.length - 1 ? 'success' : 'primary'}
+        >
+          {activeStep === steps.length - 1 ? 'Complete Setup' : 'Next'}
+        </Button>
+      </Box>
     </Box>
   );
 };
