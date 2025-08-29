@@ -1,23 +1,22 @@
-/* Reset and base styles */
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
-}
-
 body {
+  margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background: #f5f5f5;
-  color: #333;
-  line-height: 1.6;
+  background-color: #000000;
+  color: #ffffff;
 }
 
 code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New', monospace;
+  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
+    monospace;
+}
+
+/* Global black background theme styles */
+* {
+  box-sizing: border-box;
 }
 
 /* Custom scrollbar */
@@ -26,140 +25,161 @@ code {
 }
 
 ::-webkit-scrollbar-track {
-  background: #f1f1f1;
-  border-radius: 4px;
+  background: #111111;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #c1c1c1;
-  border-radius: 4px;
+  background: #ffffff;
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #a8a8a8;
+  background: #cccccc;
 }
 
-/* PWA specific styles */
-@media (display-mode: standalone) {
-  body {
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-  }
+/* Focus styles */
+*:focus {
+  outline: 2px solid #ffffff;
+  outline-offset: 2px;
 }
 
-/* iPhone safe area support */
-@supports (padding: max(0px)) {
-  body {
-    padding-top: max(0px, env(safe-area-inset-top));
-    padding-bottom: max(0px, env(safe-area-inset-bottom));
-    padding-left: max(0px, env(safe-area-inset-left));
-    padding-right: max(0px, env(safe-area-inset-right));
-  }
+/* Button hover effects */
+button:hover {
+  transform: translateY(-1px);
+  transition: transform 0.2s ease;
 }
 
-/* Enhanced Material-UI overrides for better spacing */
-.MuiContainer-root {
-  padding-top: 24px !important;
-  padding-bottom: 24px !important;
+/* Card hover effects */
+.MuiCard-root:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(255,255,255,0.15);
+  transition: all 0.3s ease;
 }
 
-.MuiCard-root {
-  margin-bottom: 24px !important;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+/* Input focus effects */
+input:focus, textarea:focus, select:focus {
+  border-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(255,255,255,0.1);
 }
 
-.MuiCardContent-root {
-  padding: 24px !important;
+/* Link styles */
+a {
+  color: #ffffff;
+  text-decoration: none;
 }
 
-.MuiButton-root {
-  margin: 8px 4px !important;
-  text-transform: none !important;
-  font-weight: 500 !important;
+a:hover {
+  color: #cccccc;
+  text-decoration: underline;
 }
 
-.MuiTextField-root {
-  margin-bottom: 16px !important;
+/* Selection styles */
+::selection {
+  background-color: #ffffff;
+  color: #000000;
 }
 
-.MuiFormControl-root {
-  margin-bottom: 16px !important;
+/* Loading spinner */
+.loading-spinner {
+  border: 3px solid #333333;
+  border-top: 3px solid #ffffff;
+  border-radius: 50%;
+  width: 30px;
+  height: 30px;
+  animation: spin 1s linear infinite;
 }
 
-.MuiGrid-container {
-  margin-bottom: 16px !important;
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
-.MuiList-root {
-  padding: 0 !important;
+/* Status indicators */
+.status-success {
+  color: #000000;
+  background-color: #ffffff;
+  border: 1px solid #ffffff;
 }
 
-.MuiListItem-root {
-  padding: 12px 16px !important;
-  margin: 4px 0 !important;
-  border-radius: 8px !important;
+.status-error {
+  color: #ffffff;
+  background-color: #333333;
+  border: 1px solid #ffffff;
 }
 
-.MuiListItem-root:hover {
-  background-color: rgba(0, 0, 0, 0.04) !important;
+.status-warning {
+  color: #ffffff;
+  background-color: #111111;
+  border: 1px solid #cccccc;
 }
 
-.MuiPaper-root {
-  margin-bottom: 16px !important;
+/* Progress bars */
+.progress-bar {
+  background-color: #333333;
+  border-radius: 0;
+  overflow: hidden;
 }
 
-.MuiStepper-root {
-  margin-bottom: 32px !important;
+.progress-fill {
+  background-color: #ffffff;
+  height: 100%;
+  transition: width 0.3s ease;
 }
 
-.MuiStepLabel-root {
-  font-weight: 500 !important;
+/* Dividers */
+.divider {
+  height: 1px;
+  background-color: #333333;
+  margin: 16px 0;
 }
 
-/* Custom spacing utilities */
-.spacing-sm { margin: 8px 0; }
-.spacing-md { margin: 16px 0; }
-.spacing-lg { margin: 24px 0; }
-.spacing-xl { margin: 32px 0; }
+/* Shadows */
+.shadow-light {
+  box-shadow: 0 2px 4px rgba(255,255,255,0.1);
+}
 
-.padding-sm { padding: 8px; }
-.padding-md { padding: 16px; }
-.padding-lg { padding: 24px; }
-.padding-xl { padding: 32px; }
+.shadow-medium {
+  box-shadow: 0 4px 8px rgba(255,255,255,0.15);
+}
 
-/* Responsive design */
-@media (max-width: 600px) {
-  .MuiContainer-root {
-    padding-left: 16px !important;
-    padding-right: 16px !important;
+.shadow-heavy {
+  box-shadow: 0 8px 16px rgba(255,255,255,0.2);
+}
+
+/* Transitions */
+.fade-in {
+  opacity: 0;
+  animation: fadeIn 0.5s ease-in forwards;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-in {
+  transform: translateX(-100%);
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+@keyframes slideIn {
+  to { transform: translateX(0); }
+}
+
+/* Responsive utilities */
+@media (max-width: 768px) {
+  .mobile-hidden {
+    display: none;
   }
   
-  .MuiCardContent-root {
-    padding: 16px !important;
-  }
-  
-  .MuiButton-root {
-    margin: 4px 2px !important;
+  .mobile-full {
+    width: 100%;
   }
 }
 
-/* Dark mode support */
-@media (prefers-color-scheme: dark) {
-  body {
-    background: #121212;
-    color: #ffffff;
-  }
-  
-  .MuiPaper-root {
-    background: #1e1e1e !important;
-    color: #ffffff !important;
-  }
-  
-  .MuiCard-root {
-    background: #1e1e1e !important;
-    color: #ffffff !important;
+@media (min-width: 769px) {
+  .desktop-hidden {
+    display: none;
   }
 }
 

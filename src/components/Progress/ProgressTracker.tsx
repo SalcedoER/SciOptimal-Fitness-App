@@ -23,7 +23,9 @@ import {
   MenuItem,
   LinearProgress,
   Divider,
-  Avatar
+  Avatar,
+  Tabs,
+  Tab
 } from '@mui/material';
 import {
   TrendingUp,
@@ -32,10 +34,38 @@ import {
   CheckCircle,
   FitnessCenter,
   Scale,
-  Straighten
+  Straighten,
+  ShowChart,
+  Timeline
 } from '@mui/icons-material';
-import { useCurrentPhase, useLatestProgress, useProgressTrends, useStrengthProgress, useAppStore } from '../../store/useAppStore';
+import { useCurrentPhase, useLatestProgress, useProgressTrends, useStrengthProgress, useAddProgressEntry } from '../../store/useAppStore';
 import { ProgressEntry, BodyMeasurements, StrengthLifts } from '../../types';
+
+interface TabPanelProps {
+  children?: React.ReactNode;
+  index: number;
+  value: number;
+}
+
+function TabPanel(props: TabPanelProps) {
+  const { children, value, index, ...other } = props;
+
+  return (
+    <div
+      role="tabpanel"
+      hidden={value !== index}
+      id={`progress-tabpanel-${index}`}
+      aria-labelledby={`progress-tab-${index}`}
+      {...other}
+    >
+      {value === index && (
+        <Box sx={{ pt: 3 }}>
+          {children}
+        </Box>
+      )}
+    </div>
+  );
+}
 
 interface ProgressDialogProps {
   open: boolean;
@@ -286,17 +316,247 @@ const ProgressDialog: React.FC<ProgressDialogProps> = ({ open, onClose, onSave }
   );
 };
 
+// Tab Components
+const ProgressOverviewTab: React.FC<{ latestProgress: ProgressEntry | null }> = ({ latestProgress }) => {
+  if (!latestProgress) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="body1" color="text.secondary">
+          No progress data yet. Start by logging your first progress entry!
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+        Progress Summary
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} sm={6}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Notes</Typography>
+            <Typography variant="body1">
+              {latestProgress.notes || 'No notes added'}
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} sm={6}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Date</Typography>
+            <Typography variant="body1">
+              {new Date(latestProgress.date).toLocaleDateString()}
+            </Typography>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+const ProgressTrendsTab: React.FC<{ progressTrends: any }> = ({ progressTrends }) => {
+  if (!progressTrends) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="body1" color="text.secondary">
+          Need at least 2 progress entries to show trends.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+        Progress Trends
+      </Typography>
+      <Grid container spacing={3}>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Weight Trend ({progressTrends.weightTrend.length} data points)
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {progressTrends.weightTrend.length > 0 ? 
+                `From ${progressTrends.weightTrend[0]?.weight} lbs to ${progressTrends.weightTrend[progressTrends.weightTrend.length - 1]?.weight} lbs` : 
+                'No weight data'
+              }
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+              Body Fat Trend ({progressTrends.bodyFatTrend.length} data points)
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              {progressTrends.bodyFatTrend.length > 0 ? 
+                `From ${progressTrends.bodyFatTrend[0]?.bodyFat}% to ${progressTrends.bodyFatTrend[progressTrends.bodyFatTrend.length - 1]?.bodyFat}%` : 
+                'No body fat data'
+              }
+            </Typography>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
+const StrengthProgressTab: React.FC<{ strengthProgress: any }> = ({ strengthProgress }) => {
+  if (!strengthProgress) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="body1" color="text.secondary">
+          Need at least 2 progress entries with strength data to show trends.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+        Strength Progress
+      </Typography>
+      <Grid container spacing={3}>
+        {strengthProgress.benchPress && strengthProgress.benchPress.length > 0 && (
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+              <Typography variant="subtitle2" color="success.main" gutterBottom>
+                Bench Press
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {strengthProgress.benchPress[strengthProgress.benchPress.length - 1]?.weight} lbs
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {strengthProgress.benchPress.length} data points
+              </Typography>
+            </Card>
+          </Grid>
+        )}
+        {strengthProgress.squat && strengthProgress.squat.length > 0 && (
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+              <Typography variant="subtitle2" color="warning.main" gutterBottom>
+                Squat
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {strengthProgress.squat[strengthProgress.squat.length - 1]?.weight} lbs
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {strengthProgress.squat.length} data points
+              </Typography>
+            </Card>
+          </Grid>
+        )}
+        {strengthProgress.deadlift && strengthProgress.deadlift.length > 0 && (
+          <Grid item xs={12} sm={6} md={4}>
+            <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+              <Typography variant="subtitle2" color="error.main" gutterBottom>
+                Deadlift
+              </Typography>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                {strengthProgress.deadlift[strengthProgress.deadlift.length - 1]?.weight} lbs
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                {strengthProgress.deadlift.length} data points
+              </Typography>
+            </Card>
+          </Grid>
+        )}
+      </Grid>
+    </Box>
+  );
+};
+
+const MeasurementsTab: React.FC<{ latestProgress: ProgressEntry | null }> = ({ latestProgress }) => {
+  if (!latestProgress) {
+    return (
+      <Box sx={{ p: 3, textAlign: 'center' }}>
+        <Typography variant="body1" color="text.secondary">
+          No measurements data yet.
+        </Typography>
+      </Box>
+    );
+  }
+
+  return (
+    <Box sx={{ p: 3 }}>
+      <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+        Body Measurements
+      </Typography>
+      <Grid container spacing={2}>
+        <Grid item xs={6} sm={4}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Waist</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {latestProgress.measurements.waist} in
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={6} sm={4}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Chest</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {latestProgress.measurements.chest} in
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={6} sm={4}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Arms</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {latestProgress.measurements.arms} in
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={6} sm={4}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Shoulders</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {latestProgress.measurements.shoulders} in
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={6} sm={4}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Thighs</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {latestProgress.measurements.thighs} in
+            </Typography>
+          </Card>
+        </Grid>
+        <Grid item xs={6} sm={4}>
+          <Card sx={{ p: 2, background: 'rgba(255,255,255,0.05)' }}>
+            <Typography variant="subtitle2" color="text.secondary">Calves</Typography>
+            <Typography variant="h6" sx={{ fontWeight: 600 }}>
+              {latestProgress.measurements.calves} in
+            </Typography>
+          </Card>
+        </Grid>
+      </Grid>
+    </Box>
+  );
+};
+
 const ProgressTracker: React.FC = () => {
   const currentPhase = useCurrentPhase();
   const latestProgress = useLatestProgress();
   const progressTrends = useProgressTrends();
   const strengthProgress = useStrengthProgress();
-  const { addProgressEntry } = useAppStore();
+  const addProgressEntry = useAddProgressEntry();
 
   const [showProgressDialog, setShowProgressDialog] = useState(false);
+  const [tabValue, setTabValue] = useState(0);
+
+  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
+    setTabValue(newValue);
+  };
 
   const handleSaveProgress = (entry: ProgressEntry) => {
     addProgressEntry(entry);
+    setShowProgressDialog(false);
   };
 
   const getWeightChange = () => {
@@ -311,193 +571,103 @@ const ProgressTracker: React.FC = () => {
 
   return (
     <Box>
-      <Typography variant="h4" gutterBottom sx={{ fontWeight: 600 }}>
-        Progress Tracker
-      </Typography>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h4" sx={{ fontWeight: 700, color: 'primary.main' }}>
+          📈 Progress Tracker
+        </Typography>
+        <Button
+          variant="contained"
+          startIcon={<Add />}
+          onClick={() => setShowProgressDialog(true)}
+          sx={{ 
+            background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+            boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)'
+          }}
+        >
+          Log Progress
+        </Button>
+      </Box>
 
-      {!currentPhase && (
-        <Alert severity="info" sx={{ mb: 3 }}>
-          No training phase found. Please set up your profile first.
-        </Alert>
-      )}
-
-      {/* Current Progress Summary */}
-      <Card sx={{ mb: 3, background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)' }}>
-        <CardContent>
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h6" sx={{ color: 'primary.main', fontWeight: 600 }}>
-              Current Progress
-            </Typography>
-            <Button
-              variant="contained"
-              startIcon={<Add />}
-              onClick={() => setShowProgressDialog(true)}
-            >
-              Update Progress
-            </Button>
-          </Box>
-
-          {latestProgress ? (
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Scale color="primary" sx={{ mr: 1 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    {latestProgress.weight} lbs
-                  </Typography>
-                  {weightChange !== 0 && (
-                    <Chip
-                      label={`${isWeightGaining ? '+' : ''}${weightChange.toFixed(1)} lbs`}
-                      color={isWeightGaining ? 'success' : 'error'}
-                      size="small"
-                      sx={{ ml: 1 }}
-                    />
-                  )}
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Current Weight
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                  <Straighten color="primary" sx={{ mr: 1 }} />
-                  <Typography variant="h5" sx={{ fontWeight: 700, color: 'primary.main' }}>
-                    {latestProgress.bodyFatPercentage || 'N/A'}%
-                  </Typography>
-                </Box>
-                <Typography variant="body2" color="text.secondary">
-                  Body Fat %
-                </Typography>
-              </Grid>
-            </Grid>
-          ) : (
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
-              No progress data yet. Start by logging your first progress entry!
-            </Typography>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Body Measurements */}
+      {/* Progress Overview Card */}
       {latestProgress && (
         <Card sx={{ mb: 3, background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)' }}>
           <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
-              Body Measurements
+            <Typography variant="h5" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+              🎯 Latest Progress Update
             </Typography>
-            <Grid container spacing={2}>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2" color="text.secondary">Waist</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {latestProgress.measurements.waist} in
-                </Typography>
+            <Grid container spacing={3}>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h4" sx={{ color: 'success.main', fontWeight: 700 }}>
+                    {latestProgress.weight} lbs
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Current Weight
+                  </Typography>
+                </Box>
               </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2" color="text.secondary">Chest</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {latestProgress.measurements.chest} in
-                </Typography>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h4" sx={{ color: 'warning.main', fontWeight: 700 }}>
+                    {latestProgress.bodyFatPercentage}%
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Body Fat %
+                  </Typography>
+                </Box>
               </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2" color="text.secondary">Arms</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {latestProgress.measurements.arms} in
-                </Typography>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h4" sx={{ color: 'info.main', fontWeight: 700 }}>
+                    {latestProgress.sleepHours}h
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Sleep Last Night
+                  </Typography>
+                </Box>
               </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2" color="text.secondary">Shoulders</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {latestProgress.measurements.shoulders} in
-                </Typography>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2" color="text.secondary">Thighs</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {latestProgress.measurements.thighs} in
-                </Typography>
-              </Grid>
-              <Grid item xs={6} sm={4}>
-                <Typography variant="subtitle2" color="text.secondary">Calves</Typography>
-                <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                  {latestProgress.measurements.calves} in
-                </Typography>
+              <Grid item xs={12} sm={6} md={3}>
+                <Box sx={{ textAlign: 'center' }}>
+                  <Typography variant="h4" sx={{ color: 'error.main', fontWeight: 700 }}>
+                    {latestProgress.stressLevel}/10
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    Stress Level
+                  </Typography>
+                </Box>
               </Grid>
             </Grid>
           </CardContent>
         </Card>
       )}
 
-      {/* Strength Progress */}
-      {latestProgress && latestProgress.strengthLifts && (
-        <Card sx={{ mb: 3, background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)' }}>
-          <CardContent>
-            <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
-              Strength Lifts
-            </Typography>
-            <Grid container spacing={2}>
-              {latestProgress.strengthLifts.benchPress && (
-                <Grid item xs={6} sm={4}>
-                  <Typography variant="subtitle2" color="text.secondary">Bench Press</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {latestProgress.strengthLifts.benchPress} lbs
-                  </Typography>
-                </Grid>
-              )}
-              {latestProgress.strengthLifts.squat && (
-                <Grid item xs={6} sm={4}>
-                  <Typography variant="subtitle2" color="text.secondary">Squat</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {latestProgress.strengthLifts.squat} lbs
-                  </Typography>
-                </Grid>
-              )}
-              {latestProgress.strengthLifts.deadlift && (
-                <Grid item xs={6} sm={4}>
-                  <Typography variant="subtitle2" color="text.secondary">Deadlift</Typography>
-                  <Typography variant="h6" sx={{ fontWeight: 600 }}>
-                    {latestProgress.strengthLifts.deadlift} lbs
-                  </Typography>
-                </Grid>
-              )}
-            </Grid>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Progress Analytics */}
+      {/* Tabs */}
       <Card sx={{ background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)' }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
-            Progress Analytics
-          </Typography>
-          
-          {progressTrends ? (
-            <Grid container spacing={2}>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2" gutterBottom>Weight Trend</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {progressTrends.weightTrend.length > 0 ? 
-                    `${progressTrends.weightTrend.length} data points` : 
-                    'No weight data yet'
-                  }
-                </Typography>
-              </Grid>
-              <Grid item xs={12} sm={6}>
-                <Typography variant="subtitle2" gutterBottom>Body Fat Trend</Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {progressTrends.bodyFatTrend.length > 0 ? 
-                    `${progressTrends.bodyFatTrend.length} data points` : 
-                    'No body fat data yet'
-                  }
-                </Typography>
-              </Grid>
-            </Grid>
-          ) : (
-            <Typography variant="body2" color="text.secondary" align="center" sx={{ py: 2 }}>
-              Start logging progress to see analytics and trends!
-            </Typography>
-          )}
-        </CardContent>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs value={tabValue} onChange={handleTabChange} aria-label="progress tabs">
+            <Tab label="Overview" icon={<Assessment />} />
+            <Tab label="Trends" icon={<ShowChart />} />
+            <Tab label="Strength" icon={<FitnessCenter />} />
+            <Tab label="Measurements" icon={<Straighten />} />
+          </Tabs>
+        </Box>
+
+        {/* Tab Panels */}
+        <TabPanel value={tabValue} index={0}>
+          <ProgressOverviewTab latestProgress={latestProgress} />
+        </TabPanel>
+        
+        <TabPanel value={tabValue} index={1}>
+          <ProgressTrendsTab progressTrends={progressTrends} />
+        </TabPanel>
+        
+        <TabPanel value={tabValue} index={2}>
+          <StrengthProgressTab strengthProgress={strengthProgress} />
+        </TabPanel>
+        
+        <TabPanel value={tabValue} index={3}>
+          <MeasurementsTab latestProgress={latestProgress} />
+        </TabPanel>
       </Card>
 
       {/* Progress Dialog */}

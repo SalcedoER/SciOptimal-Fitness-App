@@ -75,12 +75,22 @@ export const SCIENTIFIC_DATA = {
 // Note: height is in inches, converted to cm for calculation
 export function calculateBMR(profile: UserProfile): number {
   const { weight, height, age } = profile;
+  
+  // Validate inputs
+  if (!weight || !height || !age || weight <= 0 || height <= 0 || age <= 0) {
+    console.warn('Invalid profile data for BMR calculation:', { weight, height, age });
+    return 1800; // Safe default BMR
+  }
+  
   const isMale = true; // Assuming male for NFL fullback aesthetic
   
   // Convert height from inches to centimeters for BMR calculation
   const heightCm = height * 2.54;
   let bmr = (10 * weight) + (6.25 * heightCm) - (5 * age);
   bmr += isMale ? 5 : -161;
+  
+  // Ensure reasonable BMR range (1200-4000)
+  bmr = Math.max(1200, Math.min(4000, bmr));
   
   return Math.round(bmr);
 }

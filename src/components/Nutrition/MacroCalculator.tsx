@@ -27,7 +27,7 @@ import {
   TrendingUp,
   Info
 } from '@mui/icons-material';
-import { useAppStore } from '../../store/useAppStore';
+import { useUserProfile, useCurrentPhase } from '../../store/useAppStore';
 import { calculateBMR, calculateTDEE, calculateMacroTargets } from '../../utils/scientificCalculations';
 
 interface MacroTargets {
@@ -39,7 +39,8 @@ interface MacroTargets {
 }
 
 const MacroCalculator: React.FC = () => {
-  const { userProfile, currentPhase } = useAppStore();
+  const userProfile = useUserProfile();
+  const currentPhase = useCurrentPhase();
   const [macroTargets, setMacroTargets] = useState<MacroTargets | null>(null);
   const [showCalculator, setShowCalculator] = useState(false);
   const [customSettings, setCustomSettings] = useState({

@@ -1,349 +1,360 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
+  Paper,
   TextField,
   Button,
+  Typography,
   List,
   ListItem,
   ListItemText,
-  ListItemIcon,
+  Divider,
   Chip,
-  Avatar,
-  Paper,
   Alert,
   CircularProgress,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Grid
+  Card,
+  CardContent,
+  Grid,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import {
-  SmartToy,
-  Send,
-  CheckCircle,
-  ExpandMore
+  Send as SendIcon,
+  ExpandMore as ExpandMoreIcon,
+  Science as ScienceIcon,
+  TrendingUp as TrendingUpIcon,
+  Warning as WarningIcon,
+  CheckCircle as CheckCircleIcon,
+  Psychology as PsychologyIcon
 } from '@mui/icons-material';
-import { useAppStore } from '../../store/useAppStore';
-import { llmService } from '../../services/llmService';
+import { intelligentAI, AIAnalysis } from '../../services/intelligentAIService';
+import { useUserProfile, useWorkoutHistory, useNutritionLog, useSleepLog, useProgressHistory } from '../../store/useAppStore';
 
-interface AIResponse {
-  type: 'advice' | 'plan' | 'analysis' | 'question';
-  content: string;
-  citations?: string[];
-  actionable?: boolean;
-  nextSteps?: string[];
-  model?: string;
-  usage?: any;
+interface Message {
+  id: string;
+  text: string;
+  isUser: boolean;
+  timestamp: Date;
+  analysis?: AIAnalysis;
 }
 
 const AIAssistant: React.FC = () => {
-  const { userProfile, currentPhase } = useAppStore();
-  const [userQuestion, setUserQuestion] = useState('');
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputValue, setInputValue] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [conversation, setConversation] = useState<AIResponse[]>([]);
+  const [conversationHistory, setConversationHistory] = useState<string[]>([]);
+  
+  // Get user data from store
+  const userProfile = useUserProfile();
+  const workoutHistory = useWorkoutHistory();
+  const nutritionLog = useNutritionLog();
+  const sleepLog = useSleepLog();
+  const progressHistory = useProgressHistory();
+  
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
-  const handleAskQuestion = async () => {
-    if (!userQuestion.trim()) return;
-
-    setIsLoading(true);
-    
-    try {
-      // Use the LLM service for real AI responses
-      const llmResponse = await llmService.generateFitnessAdvice(
-        userQuestion,
+  // Initialize AI with user context
+  useEffect(() => {
+    if (userProfile && workoutHistory && nutritionLog && sleepLog && progressHistory) {
+      intelligentAI.setUserContext(
         userProfile,
-        { currentPhase }
+        workoutHistory,
+        nutritionLog,
+        sleepLog,
+        progressHistory
       );
+    }
+  }, [userProfile, workoutHistory, nutritionLog, sleepLog, progressHistory]);
 
-      // Process the LLM response
-      const response = await processLLMResponse(llmResponse, userQuestion);
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Welcome message
+  useEffect(() => {
+    if (messages.length === 0 && userProfile) {
+      const welcomeMessage: Message = {
+        id: 'welcome',
+        text: `Hello ${userProfile.name}! I'm your AI fitness coach, powered by the latest scientific research. I can help you with:\n\n• Workout planning and optimization\n• Nutrition advice and macro calculations\n• Recovery strategies and sleep optimization\n• Progress tracking and plateau busting\n• Evidence-based fitness guidance\n\nWhat would you like to know about today?`,
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages([welcomeMessage]);
+    }
+  }, [userProfile, messages.length]);
+
+  const handleSendMessage = async () => {
+    if (!inputValue.trim() || isLoading) return;
+
+    const userMessage: Message = {
+      id: Date.now().toString(),
+      text: inputValue,
+      isUser: true,
+      timestamp: new Date()
+    };
+
+    setMessages(prev => [...prev, userMessage]);
+    setInputValue('');
+    setIsLoading(true);
+
+    try {
+      // Get AI analysis
+      const analysis = await intelligentAI.analyzeQuestion(inputValue);
       
-      setConversation(prev => [...prev, response]);
-      setUserQuestion('');
+      // Generate AI response
+      const aiResponse = generateAIResponse(analysis);
+      
+      const aiMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: aiResponse,
+        isUser: false,
+        timestamp: new Date(),
+        analysis
+      };
+
+      setMessages(prev => [...prev, aiMessage]);
+      setConversationHistory(prev => [...prev, inputValue, aiResponse]);
     } catch (error) {
-      console.error('Error getting AI response:', error);
-      setConversation(prev => [...prev, {
-        type: 'advice',
-        content: 'I apologize, but I encountered an error. Please try again or rephrase your question.',
-        actionable: false
-      }]);
+      console.error('AI analysis error:', error);
+      const errorMessage: Message = {
+        id: (Date.now() + 1).toString(),
+        text: 'I apologize, but I encountered an error analyzing your question. Please try rephrasing or ask something else.',
+        isUser: false,
+        timestamp: new Date()
+      };
+      setMessages(prev => [...prev, errorMessage]);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const processLLMResponse = async (llmResponse: any, originalQuestion: string): Promise<AIResponse> => {
-    // Extract citations and actionable content from the response
-    const content = llmResponse.content;
+  const generateAIResponse = (analysis: AIAnalysis): string => {
+    let response = `${analysis.recommendation}\n\n`;
     
-    // Look for citations in the response
-    const citations = extractCitations(content);
-    
-    // Generate actionable next steps based on the response
-    const nextSteps = generateNextSteps(content, originalQuestion);
-    
-    // Determine response type
-    let type: 'advice' | 'plan' | 'analysis' | 'question' = 'advice';
-    if (content.includes('plan') || content.includes('program') || content.includes('schedule')) {
-      type = 'plan';
-    } else if (content.includes('analysis') || content.includes('assessment')) {
-      type = 'analysis';
+    if (analysis.implementation.length > 0) {
+      response += '**Implementation Steps:**\n';
+      analysis.implementation.forEach((step, index) => {
+        response += `${index + 1}. ${step}\n`;
+      });
+      response += '\n';
     }
-
-    return {
-      type,
-      content,
-      citations,
-      actionable: nextSteps.length > 0,
-      nextSteps,
-      model: llmResponse.model,
-      usage: llmResponse.usage
-    };
-  };
-
-  const extractCitations = (content: string): string[] => {
-    const citations: string[] = [];
     
-    // Look for common citation patterns
-    const citationPatterns = [
-      /(?:NSCA|ACSM|ISSN|American College of Sports Medicine|National Strength and Conditioning Association|International Society of Sports Nutrition)/gi,
-      /(?:research|study|evidence|guidelines|position stand)/gi,
-      /(?:Journal of|Journal|Research|Study)/gi
-    ];
-
-    citationPatterns.forEach(pattern => {
-      const matches = content.match(pattern);
-      if (matches) {
-        matches.forEach(match => {
-          if (!citations.includes(match)) {
-            citations.push(match);
-          }
-        });
-      }
+    if (analysis.warnings.length > 0) {
+      response += '**Important Notes:**\n';
+      analysis.warnings.forEach(warning => {
+        response += `⚠️ ${warning}\n`;
+      });
+      response += '\n';
+    }
+    
+    response += '**Next Steps:**\n';
+    analysis.nextSteps.forEach((step, index) => {
+      response += `${index + 1}. ${step}\n`;
     });
-
-    // If no specific citations found, add general ones based on content
-    if (citations.length === 0) {
-      if (content.includes('strength') || content.includes('training')) {
-        citations.push('NSCA Guidelines');
-      }
-      if (content.includes('nutrition') || content.includes('diet')) {
-        citations.push('ISSN Position Stands');
-      }
-      if (content.includes('exercise') || content.includes('fitness')) {
-        citations.push('ACSM Guidelines');
-      }
-    }
-
-    return citations;
+    
+    return response;
   };
 
-  const generateNextSteps = (content: string, question: string): string[] => {
-    const steps: string[] = [];
-    
-    // Generate contextual next steps based on the response content
-    if (content.includes('track') || content.includes('monitor')) {
-      steps.push('Implement tracking and monitoring systems');
+  const handleKeyPress = (event: React.KeyboardEvent) => {
+    if (event.key === 'Enter' && !event.shiftKey) {
+      event.preventDefault();
+      handleSendMessage();
     }
-    
-    if (content.includes('progressive') || content.includes('increase')) {
-      steps.push('Plan progressive overload strategy');
-    }
-    
-    if (content.includes('recovery') || content.includes('sleep')) {
-      steps.push('Optimize recovery and sleep protocols');
-    }
-    
-    if (content.includes('form') || content.includes('technique')) {
-      steps.push('Focus on proper form and technique');
-    }
-    
-    if (content.includes('nutrition') || content.includes('macros')) {
-      steps.push('Adjust nutrition plan based on recommendations');
-    }
-    
-    if (content.includes('equipment') || content.includes('gym')) {
-      steps.push('Review and optimize equipment usage');
-    }
-
-    // Add general next steps if none specific
-    if (steps.length === 0) {
-      steps.push('Review the recommendations above');
-      steps.push('Implement changes gradually');
-      steps.push('Monitor progress and adjust as needed');
-    }
-
-    return steps;
   };
 
-  const suggestedQuestions = [
-    "How should I structure my workouts for my goals?",
-    "What's the best nutrition strategy for my body type?",
-    "How do I know when to increase weight?",
-    "What recovery protocols should I follow?",
-    "How can I track my progress effectively?"
-  ];
+  const getMessageIcon = (type: string) => {
+    switch (type) {
+      case 'workout':
+        return <TrendingUpIcon color="primary" />;
+      case 'nutrition':
+        return <PsychologyIcon color="success" />;
+      case 'recovery':
+        return <CheckCircleIcon color="info" />;
+      case 'progress':
+        return <TrendingUpIcon color="secondary" />;
+      default:
+        return <ScienceIcon color="action" />;
+    }
+  };
+
+  const getConfidenceColor = (confidence: number) => {
+    if (confidence >= 90) return 'success';
+    if (confidence >= 75) return 'primary';
+    if (confidence >= 60) return 'warning';
+    return 'error';
+  };
 
   return (
-    <Box sx={{ p: { xs: 2, md: 3 } }}>
+    <Box sx={{ height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {/* Header */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent sx={{ textAlign: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
-            <SmartToy sx={{ fontSize: 40, mr: 2, color: 'primary.main' }} />
-            <Typography variant="h4">
+      <Paper elevation={2} sx={{ p: 2, backgroundColor: 'primary.main', color: 'white' }}>
+        <Box display="flex" alignItems="center" gap={2}>
+          <ScienceIcon sx={{ fontSize: 32 }} />
+          <Box>
+            <Typography variant="h5" fontWeight="bold">
               AI Fitness Coach
             </Typography>
-          </Box>
-          <Typography variant="body1" color="text.secondary">
-            Get personalized, evidence-based fitness advice from your AI coach
-          </Typography>
-          {llmService && (
-            <Alert severity="info" sx={{ mt: 2 }}>
-              <Typography variant="body2">
-                <strong>AI Service:</strong> {llmService.constructor.name} - Ready to provide intelligent fitness guidance
-              </Typography>
-            </Alert>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Input Section */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <Typography variant="h6" gutterBottom>
-            Ask Your AI Coach
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 2, mb: 2 }}>
-            <TextField
-              fullWidth
-              multiline
-              rows={3}
-              placeholder="Ask me about workouts, nutrition, recovery, progression, or any fitness topic..."
-              value={userQuestion}
-              onChange={(e) => setUserQuestion(e.target.value)}
-              variant="outlined"
-            />
-            <Button
-              variant="contained"
-              onClick={handleAskQuestion}
-              disabled={!userQuestion.trim() || isLoading}
-              startIcon={isLoading ? <CircularProgress size={20} /> : <Send />}
-              sx={{ minWidth: 100 }}
-            >
-              {isLoading ? 'Thinking...' : 'Ask'}
-            </Button>
-          </Box>
-          
-          {/* Suggested Questions */}
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            Suggested questions:
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-            {suggestedQuestions.map((question, index) => (
-              <Chip
-                key={index}
-                label={question}
-                onClick={() => setUserQuestion(question)}
-                variant="outlined"
-                size="small"
-                clickable
-              />
-            ))}
-          </Box>
-        </CardContent>
-      </Card>
-
-      {/* Conversation History */}
-      {conversation.length > 0 && (
-        <Card>
-          <CardContent>
-            <Typography variant="h6" gutterBottom>
-              Conversation History
+            <Typography variant="body2" sx={{ opacity: 0.9 }}>
+              Powered by Latest Scientific Research
             </Typography>
-            <List>
-              {conversation.map((response, index) => (
-                <ListItem key={index} sx={{ flexDirection: 'column', alignItems: 'flex-start' }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, width: '100%' }}>
-                    <Avatar sx={{ width: 32, height: 32, mr: 1, bgcolor: 'primary.main' }}>
-                      <SmartToy sx={{ fontSize: 16 }} />
-                    </Avatar>
-                    <Typography variant="subtitle2" color="primary">
-                      AI Coach
+          </Box>
+        </Box>
+      </Paper>
+
+      {/* Messages */}
+      <Box sx={{ flex: 1, overflow: 'auto', p: 2, backgroundColor: '#f5f5f5' }}>
+        {messages.map((message) => (
+          <Box
+            key={message.id}
+            sx={{
+              display: 'flex',
+              justifyContent: message.isUser ? 'flex-end' : 'flex-start',
+              mb: 2
+            }}
+          >
+            <Paper
+              elevation={1}
+              sx={{
+                p: 2,
+                maxWidth: '80%',
+                backgroundColor: message.isUser ? 'primary.main' : 'white',
+                color: message.isUser ? 'white' : 'text.primary'
+              }}
+            >
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-line' }}>
+                {message.text}
+              </Typography>
+              
+              {/* AI Analysis Details */}
+              {!message.isUser && message.analysis && (
+                <Box mt={2}>
+                  <Divider sx={{ my: 1, opacity: 0.3 }} />
+                  
+                  {/* Analysis Type and Confidence */}
+                  <Box display="flex" alignItems="center" gap={1} mb={1}>
+                    {getMessageIcon(message.analysis.type)}
+                    <Typography variant="caption" sx={{ opacity: 0.8 }}>
+                      {message.analysis.type.toUpperCase()} ANALYSIS
                     </Typography>
-                    <Chip 
-                      label={response.type} 
-                      size="small" 
-                      color="secondary" 
-                      sx={{ ml: 'auto' }}
+                    <Chip
+                      label={`${message.analysis.confidence}% Confidence`}
+                      size="small"
+                      color={getConfidenceColor(message.analysis.confidence) as any}
+                      variant="outlined"
                     />
                   </Box>
-                  
-                  <Paper sx={{ p: 2, bgcolor: 'grey.50', width: '100%', mb: 1 }}>
-                    <Typography 
-                      variant="body1" 
-                      component="div"
-                      sx={{ whiteSpace: 'pre-line' }}
-                    >
-                      {response.content}
-                    </Typography>
-                  </Paper>
 
-                  {response.citations && response.citations.length > 0 && (
-                    <Box sx={{ mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        Sources: {response.citations.join(', ')}
+                  {/* Scientific Basis */}
+                  <Accordion sx={{ backgroundColor: 'transparent', boxShadow: 'none' }}>
+                    <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+                      <Typography variant="caption" sx={{ fontWeight: 'bold' }}>
+                        🔬 Scientific Basis
                       </Typography>
-                    </Box>
-                  )}
-
-                  {response.model && (
-                    <Box sx={{ mb: 1 }}>
-                      <Typography variant="caption" color="text.secondary">
-                        AI Model: {response.model}
+                    </AccordionSummary>
+                    <AccordionDetails>
+                      <Typography variant="body2" sx={{ opacity: 0.8 }}>
+                        {message.analysis.scientificBasis}
                       </Typography>
-                    </Box>
-                  )}
-
-                  {response.actionable && response.nextSteps && (
-                    <Accordion sx={{ width: '100%' }}>
-                      <AccordionSummary expandIcon={<ExpandMore />}>
-                        <Typography variant="subtitle2" color="primary">
-                          Action Steps
-                        </Typography>
-                      </AccordionSummary>
-                      <AccordionDetails>
-                        <List dense>
-                          {response.nextSteps.map((step, stepIndex) => (
-                            <ListItem key={stepIndex} sx={{ py: 0.5 }}>
-                              <ListItemIcon sx={{ minWidth: 32 }}>
-                                <CheckCircle color="primary" fontSize="small" />
-                              </ListItemIcon>
-                              <ListItemText primary={step} />
-                            </ListItem>
+                      {message.analysis.studies.length > 0 && (
+                        <Box mt={1}>
+                          <Typography variant="caption" fontWeight="bold">
+                            Supporting Studies:
+                          </Typography>
+                          {message.analysis.studies.map((study, index) => (
+                            <Chip
+                              key={index}
+                              label={study}
+                              size="small"
+                              variant="outlined"
+                              sx={{ mr: 0.5, mt: 0.5 }}
+                            />
                           ))}
-                        </List>
-                      </AccordionDetails>
-                    </Accordion>
-                  )}
-                </ListItem>
-              ))}
-            </List>
-          </CardContent>
-        </Card>
-      )}
+                        </Box>
+                      )}
+                    </AccordionDetails>
+                  </Accordion>
 
-      {/* Profile Status */}
-      {!userProfile && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          <Typography variant="body2">
-            <strong>Complete your profile</strong> to get personalized, accurate fitness advice tailored to your goals, equipment, and body composition.
-          </Typography>
-        </Alert>
-      )}
+                  {/* Warnings */}
+                  {message.analysis.warnings.length > 0 && (
+                    <Alert severity="warning" sx={{ mt: 1 }}>
+                      <Typography variant="caption">
+                        {message.analysis.warnings.join(', ')}
+                      </Typography>
+                    </Alert>
+                  )}
+
+                  {/* Follow-up Questions */}
+                  {message.analysis.followUpQuestions.length > 0 && (
+                    <Box mt={1}>
+                      <Typography variant="caption" fontWeight="bold" display="block">
+                        💭 Follow-up Questions:
+                      </Typography>
+                      {message.analysis.followUpQuestions.map((question, index) => (
+                        <Typography
+                          key={index}
+                          variant="caption"
+                          sx={{ opacity: 0.7, display: 'block', mt: 0.5 }}
+                        >
+                          • {question}
+                        </Typography>
+                      ))}
+                    </Box>
+                  )}
+                </Box>
+              )}
+            </Paper>
+          </Box>
+        ))}
+        
+        {isLoading && (
+          <Box display="flex" justifyContent="flex-start" mb={2}>
+            <Paper elevation={1} sx={{ p: 2, backgroundColor: 'white' }}>
+              <Box display="flex" alignItems="center" gap={1}>
+                <CircularProgress size={20} />
+                <Typography variant="body2" color="text.secondary">
+                  Analyzing your question with scientific research...
+                </Typography>
+              </Box>
+            </Paper>
+          </Box>
+        )}
+        
+        <div ref={messagesEndRef} />
+      </Box>
+
+      {/* Input */}
+      <Paper elevation={3} sx={{ p: 2, backgroundColor: 'white' }}>
+        <Box display="flex" gap={1}>
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
+            value={inputValue}
+            onChange={(e) => setInputValue(e.target.value)}
+            onKeyPress={handleKeyPress}
+            placeholder="Ask me anything about fitness, nutrition, or recovery..."
+            variant="outlined"
+            size="small"
+            disabled={isLoading}
+          />
+          <Button
+            variant="contained"
+            onClick={handleSendMessage}
+            disabled={!inputValue.trim() || isLoading}
+            sx={{ minWidth: 'auto', px: 2 }}
+          >
+            <SendIcon />
+          </Button>
+        </Box>
+        
+        <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
+          💡 Try asking: "How many sets should I do for chest?", "What's the best protein intake for muscle gain?", or "How can I improve my recovery?"
+        </Typography>
+      </Paper>
     </Box>
   );
 };

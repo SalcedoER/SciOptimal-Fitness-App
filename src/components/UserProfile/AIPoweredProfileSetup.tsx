@@ -34,8 +34,9 @@ import {
   DirectionsRun,
   MonitorWeight
 } from '@mui/icons-material';
-import { useAppStore } from '../../store/useAppStore';
+import { useSetUserProfile, useSetCurrentPhase } from '../../store/useAppStore';
 import { Equipment, ActivityLevel } from '../../types';
+import { generateTrainingProgram } from '../../utils/trainingPhaseGenerator';
 
 interface AIQuestion {
   id: string;
@@ -55,7 +56,8 @@ interface AIResponse {
 }
 
 const AIPoweredProfileSetup: React.FC = () => {
-  const { setUserProfile } = useAppStore();
+  const setUserProfile = useSetUserProfile();
+  const setCurrentPhase = useSetCurrentPhase();
   const [conversation, setConversation] = useState<AIResponse[]>([]);
   const [currentQuestion, setCurrentQuestion] = useState<AIQuestion | null>(null);
   const [userAnswer, setUserAnswer] = useState('');
@@ -239,7 +241,7 @@ const AIPoweredProfileSetup: React.FC = () => {
   }, []);
 
   const handleAnswer = async () => {
-    if (!currentQuestion || !userAnswer.trim()) return;
+    if (!currentQuestion || !userAnswer.trim() || isLoading) return;
 
     setIsLoading(true);
 
@@ -355,14 +357,14 @@ const AIPoweredProfileSetup: React.FC = () => {
     // Simulate AI plan generation
     await new Promise(resolve => setTimeout(resolve, 2000));
 
-    // Create the final user profile
+    // Create the final user profile with validation
     const userProfile = {
       id: `profile_${Date.now()}`,
-      name: finalProfileData.name,
-      age: parseInt(finalProfileData.age),
-      height: parseFloat(finalProfileData.height),
-      weight: parseFloat(finalProfileData.weight),
-      bodyFatPercentage: parseFloat(finalProfileData.bodyFat || '20'),
+      name: finalProfileData.name || 'Unknown User',
+      age: Math.max(16, Math.min(100, parseInt(finalProfileData.age) || 25)),
+      height: Math.max(48, Math.min(96, parseFloat(finalProfileData.height) || 70)), // 4-8 feet
+      weight: Math.max(80, Math.min(300, parseFloat(finalProfileData.weight) || 70)), // 80-300 lbs converted to kg
+      bodyFatPercentage: Math.max(5, Math.min(50, parseFloat(finalProfileData.bodyFat || '20'))),
       targetPhysique: finalProfileData.targetPhysique,
       equipment: finalProfileData.equipment ? finalProfileData.equipment.split(',').map((e: string) => e.trim().toLowerCase().replace(' ', '_') as Equipment) : [],
       activityLevel: finalProfileData.activityLevel?.toLowerCase().replace(' ', '_') as ActivityLevel,
@@ -386,6 +388,13 @@ const AIPoweredProfileSetup: React.FC = () => {
 
     // Complete the setup
     setUserProfile(userProfile);
+    
+    // Generate and set the first training phase
+    const trainingPhases = generateTrainingProgram(userProfile);
+    if (trainingPhases.length > 0) {
+      setCurrentPhase(trainingPhases[0]); // Set Phase 1 as the current phase
+    }
+    
     setIsComplete(true);
     setIsLoading(false);
   };

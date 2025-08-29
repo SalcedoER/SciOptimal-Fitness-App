@@ -27,7 +27,7 @@ const InstallPrompt: React.FC = () => {
 
   useEffect(() => {
     // Check if app is already installed
-    const isInstalled = window.matchMedia('(display-mode: standalone)').matches;
+    const isInstalled = window.matchMedia && window.matchMedia('(display-mode: standalone)').matches;
     
     if (!isInstalled) {
       // Listen for beforeinstallprompt event

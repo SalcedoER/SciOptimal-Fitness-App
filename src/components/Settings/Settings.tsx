@@ -64,7 +64,7 @@ import {
   TrendingUp,
   Assessment
 } from '@mui/icons-material';
-import { useAppStore } from '../../store/useAppStore';
+import { useUserProfile, useSetUserProfile, useLogout } from '../../store/useAppStore';
 import { UserProfile, ActivityLevel, Equipment } from '../../types';
 
 interface TabPanelProps {
@@ -88,7 +88,9 @@ function TabPanel(props: TabPanelProps) {
 }
 
 const Settings: React.FC = () => {
-  const { userProfile, setUserProfile, logout } = useAppStore();
+  const userProfile = useUserProfile();
+  const setUserProfile = useSetUserProfile();
+  const logout = useLogout();
   const [tabValue, setTabValue] = useState(0);
   const [editProfile, setEditProfile] = useState(false);
   const [profileData, setProfileData] = useState<Partial<UserProfile>>(userProfile || {});

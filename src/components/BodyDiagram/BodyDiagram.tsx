@@ -11,7 +11,7 @@ import {
   IconButton
 } from '@mui/material';
 import { Info, FitnessCenter } from '@mui/icons-material';
-import { useWorkoutHistory, useWorkoutDays, useCurrentPhase } from '../../store/useAppStore';
+import { useWorkoutHistory, useWorkoutDays } from '../../store/useAppStore';
 import { MuscleGroup, Exercise, CompletedExercise, WorkoutDay, WorkoutSession } from '../../types';
 
 interface MuscleGroupData {
@@ -29,56 +29,56 @@ const MUSCLE_GROUPS: Record<MuscleGroup, MuscleGroupData> = {
     count: 0,
     percentage: 0,
     color: '#ff6b6b',
-    svgPath: 'M 50 20 Q 60 25 70 20 Q 80 25 90 20 L 90 35 Q 80 40 70 35 Q 60 40 50 35 Z',
-    position: { x: 70, y: 27 }
+    svgPath: 'M 40 25 Q 50 30 60 25 Q 70 30 80 25 L 80 40 Q 70 45 60 40 Q 50 45 40 40 Z',
+    position: { x: 60, y: 32 }
   },
   back: {
     name: 'Back',
     count: 0,
     percentage: 0,
     color: '#4ecdc4',
-    svgPath: 'M 30 20 Q 40 25 50 20 Q 60 25 70 20 L 70 35 Q 60 40 50 35 Q 40 40 30 35 Z',
-    position: { x: 50, y: 27 }
+    svgPath: 'M 20 25 Q 30 30 40 25 Q 50 30 60 25 L 60 40 Q 50 45 40 40 Q 30 45 20 40 Z',
+    position: { x: 40, y: 32 }
   },
   shoulders: {
     name: 'Shoulders',
     count: 0,
     percentage: 0,
     color: '#45b7d1',
-    svgPath: 'M 25 15 Q 35 20 45 15 Q 55 20 65 15 Q 75 20 85 15 L 85 25 Q 75 30 65 25 Q 55 30 45 25 Q 35 30 25 25 Z',
-    position: { x: 55, y: 20 }
+    svgPath: 'M 15 20 Q 25 25 35 20 Q 45 25 55 20 Q 65 25 75 20 L 75 30 Q 65 35 55 30 Q 45 35 35 30 Q 25 35 15 30 Z',
+    position: { x: 45, y: 25 }
   },
   arms: {
     name: 'Arms',
     count: 0,
     percentage: 0,
     color: '#96ceb4',
-    svgPath: 'M 20 30 L 20 50 Q 20 55 25 55 L 35 55 Q 40 55 40 50 L 40 30 Z M 70 30 L 70 50 Q 70 55 75 55 L 85 55 Q 90 55 90 50 L 90 30 Z',
-    position: { x: 55, y: 42 }
+    svgPath: 'M 15 35 L 15 55 Q 15 60 20 60 L 30 60 Q 35 60 35 55 L 35 35 Z M 65 35 L 65 55 Q 65 60 70 60 L 80 60 Q 85 60 85 55 L 85 35 Z',
+    position: { x: 50, y: 47 }
   },
   legs: {
     name: 'Legs',
     count: 0,
     percentage: 0,
     color: '#feca57',
-    svgPath: 'M 35 60 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 60 Z',
-    position: { x: 50, y: 77 }
+    svgPath: 'M 30 65 L 30 95 Q 30 100 35 100 L 65 100 Q 70 100 70 95 L 70 65 Z',
+    position: { x: 50, y: 82 }
   },
   core: {
     name: 'Core',
     count: 0,
     percentage: 0,
     color: '#ff9ff3',
-    svgPath: 'M 40 40 L 40 55 Q 40 60 45 60 L 55 60 Q 60 60 60 55 L 60 40 Z',
-    position: { x: 50, y: 47 }
+    svgPath: 'M 35 45 L 35 60 Q 35 65 40 65 L 60 65 Q 65 65 65 60 L 65 45 Z',
+    position: { x: 50, y: 52 }
   },
   forearms: {
     name: 'Forearms',
     count: 0,
     percentage: 0,
     color: '#54a0ff',
-    svgPath: 'M 15 45 L 15 55 Q 15 60 20 60 L 30 60 Q 35 60 35 55 L 35 45 Z M 75 45 L 75 55 Q 75 60 80 60 L 90 60 Q 95 60 95 55 L 95 45 Z',
-    position: { x: 55, y: 52 }
+    svgPath: 'M 10 50 L 10 60 Q 10 65 15 65 L 25 65 Q 30 65 30 60 L 30 50 Z M 70 50 L 70 60 Q 70 65 75 65 L 85 65 Q 90 65 90 60 L 90 50 Z',
+    position: { x: 50, y: 57 }
   }
 };
 
@@ -98,7 +98,6 @@ const BodyDiagram: React.FC<{
 }> = ({ workoutId, showWeekly = false, title }) => {
   const workoutHistory = useWorkoutHistory();
   const workoutDays = useWorkoutDays();
-  const currentPhase = useCurrentPhase();
 
   const muscleGroupData = useMemo(() => {
     const data = { ...MUSCLE_GROUPS };
@@ -244,7 +243,7 @@ const BodyDiagram: React.FC<{
               >
                 {/* Body outline */}
                 <path
-                  d="M 50 10 Q 60 15 70 10 Q 80 15 90 10 L 90 25 Q 80 30 70 25 Q 60 30 50 25 Q 40 30 30 25 Q 20 30 10 25 L 10 10 Q 20 15 30 10 Q 40 15 50 10 Z M 35 25 L 35 90 Q 35 95 40 95 L 60 95 Q 65 95 65 90 L 65 25 Z"
+                  d="M 50 10 Q 60 15 70 10 Q 80 15 90 10 L 90 25 Q 80 30 70 25 Q 60 30 50 25 Q 40 30 30 25 Q 20 30 10 25 L 10 10 Q 20 15 30 10 Q 40 15 50 10 Z M 35 25 L 35 95 Q 35 100 40 100 L 60 100 Q 65 100 65 95 L 65 25 Z"
                   fill="none"
                   stroke="#666"
                   strokeWidth="0.5"

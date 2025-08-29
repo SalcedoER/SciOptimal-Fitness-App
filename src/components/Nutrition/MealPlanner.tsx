@@ -32,7 +32,7 @@ import {
   Edit as EditIcon,
   Search as SearchIcon
 } from '@mui/icons-material';
-import { useAppStore } from '../../store/useAppStore';
+import { useUserProfile, useCurrentPhase } from '../../store/useAppStore';
 
 interface Meal {
   id: string;
@@ -75,7 +75,8 @@ const commonFoods: FoodItem[] = [
 ];
 
 const MealPlanner: React.FC = () => {
-  const { userProfile, currentPhase } = useAppStore();
+  const userProfile = useUserProfile();
+  const currentPhase = useCurrentPhase();
   const [meals, setMeals] = useState<Meal[]>([]);
   const [showAddMeal, setShowAddMeal] = useState(false);
   const [currentMeal, setCurrentMeal] = useState<Partial<Meal>>({

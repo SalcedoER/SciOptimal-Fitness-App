@@ -30,11 +30,13 @@ import {
   Add as AddIcon,
   Edit as EditIcon 
 } from '@mui/icons-material';
-import { useAppStore, useSleepLog } from '../../store/useAppStore';
+import { useUserProfile, useCurrentPhase, useAddSleepEntry, useSleepLog } from '../../store/useAppStore';
 import { SleepEntry } from '../../types';
 
 const SleepTracker: React.FC = () => {
-  const { userProfile, currentPhase, addSleepEntry } = useAppStore();
+  const userProfile = useUserProfile();
+  const currentPhase = useCurrentPhase();
+  const addSleepEntry = useAddSleepEntry();
   const sleepEntries = useSleepLog();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [currentEntry, setCurrentEntry] = useState<Partial<SleepEntry>>({
