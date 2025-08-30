@@ -1,9 +1,13 @@
 {
-  "name": "phase-fitness-app",
-  "version": "1.0.0",
-  "description": "Phase-based fitness app with scientific programming and nutrition tracking",
+  "name": "scioptimal-fitness-app",
+  "version": "2.0.0",
+  "description": "AI-Powered Fitness Application with Scientific Programming and Nutrition Tracking",
   "private": true,
   "dependencies": {
+    "@emotion/react": "^11.10.5",
+    "@emotion/styled": "^11.10.5",
+    "@mui/icons-material": "^5.11.9",
+    "@mui/material": "^5.11.10",
     "@types/node": "^18.15.0",
     "@types/react": "^18.0.28",
     "@types/react-dom": "^18.0.11",
@@ -12,20 +16,7 @@
     "react-scripts": "5.0.1",
     "typescript": "^4.9.5",
     "web-vitals": "^2.1.4",
-    "@mui/material": "^5.11.10",
-    "@mui/icons-material": "^5.11.9",
-    "@emotion/react": "^11.10.5",
-    "@emotion/styled": "^11.10.5",
-    "recharts": "^2.5.0",
-    "date-fns": "^2.29.3",
-    "react-router-dom": "^6.8.1",
-    "zustand": "^4.3.6",
-    "react-hook-form": "^7.43.5",
-    "@hookform/resolvers": "^2.9.11",
-    "yup": "^1.0.2",
-    "framer-motion": "^10.0.1",
-    "react-query": "^3.39.3",
-    "localforage": "^1.10.0"
+    "zustand": "^5.0.8"
   },
   "scripts": {
     "start": "react-scripts start",
@@ -53,5 +44,16 @@
   },
   "devDependencies": {
     "@types/jest": "^27.5.2"
-  }
+  },
+  "homepage": ".",
+  "author": "SciOptimal Team",
+  "keywords": [
+    "fitness",
+    "ai",
+    "workout",
+    "nutrition",
+    "tracking",
+    "react",
+    "typescript"
+  ]
 }
