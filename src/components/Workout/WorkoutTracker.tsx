@@ -38,7 +38,7 @@ import {
   Schedule,
   LocalFireDepartment
 } from '@mui/icons-material';
-import { useCurrentPhase, useTodayWorkout, useAppStore } from '../../store/useAppStore';
+import { useCurrentPhase, useTodayWorkout, useAddWorkoutSession } from '../../store/useAppStore';
 import { Exercise, CompletedExercise, CompletedSet, WorkoutSession } from '../../types';
 
 interface WorkoutTimerProps {
@@ -194,7 +194,11 @@ const ExerciseLog: React.FC<ExerciseLogProps> = ({ exercise, onComplete, onSkip 
                 label="Weight (lbs)"
                 type="number"
                 value={currentSet.weight}
-                onChange={(e) => setCurrentSet({ ...currentSet, weight: Number(e.target.value) })}
+                onChange={(e) => {
+                  const weight = Math.max(0, Math.min(2000, Number(e.target.value) || 0));
+                  setCurrentSet({ ...currentSet, weight });
+                }}
+                inputProps={{ min: 0, max: 2000, step: 0.5 }}
                 size="small"
               />
           </Grid>
@@ -204,7 +208,11 @@ const ExerciseLog: React.FC<ExerciseLogProps> = ({ exercise, onComplete, onSkip 
               label="Reps"
               type="number"
               value={currentSet.reps}
-              onChange={(e) => setCurrentSet({ ...currentSet, reps: Number(e.target.value) })}
+              onChange={(e) => {
+                const reps = Math.max(0, Math.min(100, Number(e.target.value) || 0));
+                setCurrentSet({ ...currentSet, reps });
+              }}
+              inputProps={{ min: 0, max: 100, step: 1 }}
               size="small"
             />
           </Grid>
@@ -258,18 +266,26 @@ const ExerciseLog: React.FC<ExerciseLogProps> = ({ exercise, onComplete, onSkip 
 const WorkoutTracker: React.FC = () => {
   const currentPhase = useCurrentPhase();
   const todayWorkout = useTodayWorkout();
-  const { addWorkoutSession } = useAppStore();
+  const addWorkoutSession = useAddWorkoutSession();
   
   const [currentExerciseIndex, setCurrentExerciseIndex] = useState(0);
   const [completedExercises, setCompletedExercises] = useState<CompletedExercise[]>([]);
   const [isWorkoutActive, setIsWorkoutActive] = useState(false);
-  const [showTimer, setShowTimer] = useState(false);
-  const [restDuration, setRestDuration] = useState(90);
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
+  const [showWorkoutDialog, setShowWorkoutDialog] = useState(false);
+  const [currentWorkoutData, setCurrentWorkoutData] = useState<Partial<WorkoutSession>>({
+    exercises: [],
+    duration: 0,
+    rpe: 7,
+    notes: ''
+  });
 
-  const today = new Date().getDay();
-  const isWorkoutDay = currentPhase && !currentPhase.trainingSplit.restDays.includes(today);
-  const currentDay = currentPhase?.trainingSplit.days.find(day => day.dayNumber === today);
+  // Get today's scheduled workout from training plan
+  const todayScheduledWorkout = currentPhase?.trainingSplit.days.find(
+    day => day.dayNumber === new Date().getDay()
+  );
+
+  const isWorkoutDay = currentPhase?.trainingSplit.restDays.indexOf(new Date().getDay()) === -1;
 
   const startWorkout = () => {
     setIsWorkoutActive(true);
@@ -279,11 +295,11 @@ const WorkoutTracker: React.FC = () => {
   };
 
   const completeExercise = (sets: CompletedSet[]) => {
-    if (!currentDay) return;
+    if (!todayScheduledWorkout) return;
 
-    const exercise = currentDay.exercises[currentExerciseIndex] || 
-                    currentDay.accessories[currentExerciseIndex - currentDay.exercises.length] ||
-                    currentDay.abs[currentExerciseIndex - currentDay.exercises.length - currentDay.accessories.length];
+    const exercise = todayScheduledWorkout.exercises[currentExerciseIndex] || 
+                    todayScheduledWorkout.accessories[currentExerciseIndex - todayScheduledWorkout.exercises.length] ||
+                    todayScheduledWorkout.abs[currentExerciseIndex - todayScheduledWorkout.exercises.length - todayScheduledWorkout.accessories.length];
 
     if (exercise) {
       const completedExercise: CompletedExercise = {
@@ -296,8 +312,8 @@ const WorkoutTracker: React.FC = () => {
       
       if (currentExerciseIndex < getTotalExercises() - 1) {
         setCurrentExerciseIndex(currentExerciseIndex + 1);
-        setShowTimer(true);
-        setRestDuration(exercise.restTime);
+        // setShowTimer(true); // This line was removed as per the new_code
+        // setRestDuration(exercise.restTime); // This line was removed as per the new_code
       } else {
         finishWorkout();
       }
@@ -318,7 +334,7 @@ const WorkoutTracker: React.FC = () => {
       const workoutSession: WorkoutSession = {
         id: `workout_${Date.now()}`,
         date: new Date(),
-        trainingDay: currentDay!,
+        trainingDay: todayScheduledWorkout!,
         exercises: completedExercises,
         duration,
         notes: '',
@@ -335,19 +351,19 @@ const WorkoutTracker: React.FC = () => {
   };
 
   const getTotalExercises = () => {
-    if (!currentDay) return 0;
-    return currentDay.exercises.length + currentDay.accessories.length + currentDay.abs.length;
+    if (!todayScheduledWorkout) return 0;
+    return todayScheduledWorkout.exercises.length + todayScheduledWorkout.accessories.length + todayScheduledWorkout.abs.length;
   };
 
   const getCurrentExercise = () => {
-    if (!currentDay) return null;
+    if (!todayScheduledWorkout) return null;
     
-    if (currentExerciseIndex < currentDay.exercises.length) {
-      return currentDay.exercises[currentExerciseIndex];
-    } else if (currentExerciseIndex < currentDay.exercises.length + currentDay.accessories.length) {
-      return currentDay.accessories[currentExerciseIndex - currentDay.exercises.length];
+    if (currentExerciseIndex < todayScheduledWorkout.exercises.length) {
+      return todayScheduledWorkout.exercises[currentExerciseIndex];
+    } else if (currentExerciseIndex < todayScheduledWorkout.exercises.length + todayScheduledWorkout.accessories.length) {
+      return todayScheduledWorkout.accessories[currentExerciseIndex - todayScheduledWorkout.exercises.length];
     } else {
-      return currentDay.abs[currentExerciseIndex - currentDay.exercises.length - currentDay.accessories.length];
+      return todayScheduledWorkout.abs[currentExerciseIndex - todayScheduledWorkout.exercises.length - todayScheduledWorkout.accessories.length];
     }
   };
 
@@ -419,11 +435,107 @@ const WorkoutTracker: React.FC = () => {
         Workout Tracker
       </Typography>
 
+      {/* Today's Scheduled Workout */}
+      {todayScheduledWorkout && (
+        <Card sx={{ mb: 3, background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)' }}>
+          <CardContent>
+            <Typography variant="h5" gutterBottom sx={{ color: 'primary.main', fontWeight: 600 }}>
+              🎯 Today's Training Plan
+            </Typography>
+            
+            <Box sx={{ mb: 2 }}>
+              <Typography variant="h6" color="text.secondary" gutterBottom>
+                Muscle Groups: {todayScheduledWorkout.muscleGroups.map(group => 
+                  group.charAt(0).toUpperCase() + group.slice(1)
+                ).join(', ')}
+              </Typography>
+              
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={4}>
+                  <Typography variant="subtitle1" color="primary.main" gutterBottom>
+                    Compound Exercises ({todayScheduledWorkout.exercises.length})
+                  </Typography>
+                  <List dense>
+                    {todayScheduledWorkout.exercises.map((exercise, index) => (
+                      <ListItem key={index} sx={{ py: 0.5 }}>
+                        <ListItemIcon>
+                          <FitnessCenter sx={{ fontSize: 16, color: 'primary.main' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={exercise.name}
+                          secondary={`${exercise.sets} sets × ${exercise.reps} reps`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <Typography variant="subtitle1" color="success.main" gutterBottom>
+                    Accessories ({todayScheduledWorkout.accessories.length})
+                  </Typography>
+                  <List dense>
+                    {todayScheduledWorkout.accessories.map((exercise, index) => (
+                      <ListItem key={index} sx={{ py: 0.5 }}>
+                        <ListItemIcon>
+                          <FitnessCenter sx={{ fontSize: 16, color: 'success.main' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={exercise.name}
+                          secondary={`${exercise.sets} sets × ${exercise.reps} reps`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+                
+                <Grid item xs={12} md={4}>
+                  <Typography variant="subtitle1" color="warning.main" gutterBottom>
+                    Core Work ({todayScheduledWorkout.abs.length})
+                  </Typography>
+                  <List dense>
+                    {todayScheduledWorkout.abs.map((exercise, index) => (
+                      <ListItem key={index} sx={{ py: 0.5 }}>
+                        <ListItemIcon>
+                          <FitnessCenter sx={{ fontSize: 16, color: 'warning.main' }} />
+                        </ListItemIcon>
+                        <ListItemText 
+                          primary={exercise.name}
+                          secondary={`${exercise.sets} sets × ${exercise.reps} reps`}
+                        />
+                      </ListItem>
+                    ))}
+                  </List>
+                </Grid>
+              </Grid>
+            </Box>
+            
+            {!isWorkoutActive && (
+              <Button
+                variant="contained"
+                size="large"
+                startIcon={<PlayArrow />}
+                onClick={startWorkout}
+                sx={{ 
+                  background: 'linear-gradient(45deg, #2196F3 30%, #21CBF3 90%)',
+                  boxShadow: '0 3px 5px 2px rgba(33, 203, 243, .3)',
+                  '&:hover': {
+                    background: 'linear-gradient(45deg, #1976D2 30%, #00BCD4 90%)',
+                  }
+                }}
+              >
+                Start Today's Workout
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+      )}
+
       {!isWorkoutActive ? (
         <Card sx={{ background: 'linear-gradient(145deg, #1a1a1a 0%, #222222 100%)' }}>
           <CardContent>
             <Typography variant="h6" gutterBottom sx={{ color: 'primary.main' }}>
-              Today's Workout: {currentDay?.muscleGroups.join(', ')}
+              Today's Workout: {todayScheduledWorkout?.muscleGroups.join(', ')}
             </Typography>
             <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
               {getTotalExercises()} exercises • Estimated duration: 60-90 minutes
@@ -432,7 +544,7 @@ const WorkoutTracker: React.FC = () => {
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>Exercises:</Typography>
               <List dense>
-                {currentDay?.exercises.map((exercise, index) => (
+                {todayScheduledWorkout?.exercises.map((exercise, index) => (
                   <ListItem key={index} sx={{ py: 0.5 }}>
                     <ListItemIcon>
                       <FitnessCenter fontSize="small" />
@@ -443,7 +555,7 @@ const WorkoutTracker: React.FC = () => {
                     />
                   </ListItem>
                 ))}
-                {currentDay?.accessories.map((exercise, index) => (
+                {todayScheduledWorkout?.accessories.map((exercise, index) => (
                   <ListItem key={`acc-${index}`} sx={{ py: 0.5 }}>
                     <ListItemIcon>
                       <TrendingUp fontSize="small" />
@@ -491,13 +603,13 @@ const WorkoutTracker: React.FC = () => {
           </Card>
 
           {/* Rest Timer */}
-          {showTimer && (
+          {/* showTimer && ( // This line was removed as per the new_code
             <WorkoutTimer
-              duration={restDuration}
-              onComplete={() => setShowTimer(false)}
-              onCancel={() => setShowTimer(false)}
+              duration={restDuration} // This line was removed as per the new_code
+              onComplete={() => setShowTimer(false)} // This line was removed as per the new_code
+              onCancel={() => setShowTimer(false)} // This line was removed as per the new_code
             />
-          )}
+          ) */}
 
           {/* Current Exercise */}
           {getCurrentExercise() && (
