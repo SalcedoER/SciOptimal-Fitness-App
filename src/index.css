@@ -104,15 +104,152 @@ select:focus {
   box-shadow: 0 0 20px rgba(0, 230, 118, 0.3);
 }
 
-/* Responsive design helpers */
+/* Enhanced Mobile Responsiveness */
 @media (max-width: 768px) {
   body {
     font-size: 14px;
+  }
+  
+  /* Optimize container padding for mobile */
+  .MuiContainer-root {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  
+  /* Improve card spacing on mobile */
+  .MuiCard-root {
+    margin-bottom: 12px;
+  }
+  
+  /* Better button sizing for mobile */
+  .MuiButton-root {
+    min-height: 44px; /* Touch-friendly size */
+  }
+  
+  /* Optimize tab navigation for mobile */
+  .MuiTabs-root {
+    min-height: 48px;
+  }
+  
+  .MuiTab-root {
+    min-width: 80px;
+    padding: 8px 12px;
+    font-size: 0.8rem;
   }
 }
 
 @media (max-width: 480px) {
   body {
     font-size: 12px;
+  }
+  
+  /* Ultra-compact mobile layout */
+  .MuiContainer-root {
+    padding-left: 4px !important;
+    padding-right: 4px !important;
+  }
+  
+  /* Compact cards for small screens */
+  .MuiCardContent-root {
+    padding: 12px !important;
+  }
+  
+  /* Stack grid items on small screens */
+  .MuiGrid-item {
+    padding-left: 4px !important;
+    padding-top: 4px !important;
+  }
+  
+  /* Smaller typography for mobile */
+  .MuiTypography-h4 {
+    font-size: 1.5rem !important;
+  }
+  
+  .MuiTypography-h6 {
+    font-size: 1rem !important;
+  }
+  
+  /* Optimize dialog sizing for mobile */
+  .MuiDialog-paper {
+    margin: 8px;
+    width: calc(100% - 16px);
+    max-height: calc(100% - 16px);
+  }
+  
+  /* Touch-friendly form inputs */
+  .MuiTextField-root {
+    margin-bottom: 8px;
+  }
+  
+  .MuiInputBase-root {
+    font-size: 16px; /* Prevents zoom on iOS */
+  }
+  
+  /* Compact tabs for mobile */
+  .MuiTab-root {
+    min-width: 60px;
+    padding: 6px 8px;
+    font-size: 0.7rem;
+  }
+  
+  /* Hide tab labels on very small screens, show only icons */
+  .MuiTab-root .MuiTab-wrapper {
+    flex-direction: column;
+  }
+}
+
+/* Landscape phone optimization */
+@media (max-width: 896px) and (orientation: landscape) {
+  .MuiContainer-root {
+    padding-top: 8px !important;
+  }
+  
+  .MuiAppBar-root {
+    min-height: 48px;
+  }
+  
+  .MuiToolbar-root {
+    min-height: 48px !important;
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}
+
+/* Touch-friendly interactive elements */
+@media (pointer: coarse) {
+  .MuiButton-root,
+  .MuiIconButton-root,
+  .MuiTab-root {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .MuiListItem-root {
+    min-height: 48px;
+  }
+}
+
+/* Improve text readability on mobile */
+@media (max-width: 600px) {
+  .text-gradient {
+    font-size: 1.8rem !important;
+    line-height: 1.2;
+  }
+  
+  /* Ensure proper spacing for mobile cards */
+  .slide-in {
+    margin-bottom: 16px;
+  }
+  
+  /* Optimize progress bars for mobile */
+  .MuiLinearProgress-root {
+    height: 8px;
+    border-radius: 4px;
+  }
+  
+  /* Better chip layout on mobile */
+  .MuiChip-root {
+    margin: 2px;
+    font-size: 0.7rem;
   }
 }

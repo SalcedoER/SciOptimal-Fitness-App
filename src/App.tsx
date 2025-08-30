@@ -75,6 +75,7 @@ const theme = createTheme({
           background: 'linear-gradient(145deg, #1e1e1e 0%, #2a2a2a 100%)',
           border: '1px solid rgba(0, 230, 118, 0.1)',
           backdropFilter: 'blur(10px)',
+          borderRadius: '12px',
         },
       },
     },
@@ -82,6 +83,40 @@ const theme = createTheme({
       styleOverrides: {
         root: {
           background: 'linear-gradient(45deg, #1e3c72 30%, #2a5298 90%)',
+        },
+      },
+    },
+    MuiContainer: {
+      styleOverrides: {
+        root: {
+          '@media (max-width: 600px)': {
+            paddingLeft: '8px',
+            paddingRight: '8px',
+          },
+        },
+      },
+    },
+    MuiButton: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
+          textTransform: 'none',
+          fontWeight: 600,
+          '@media (max-width: 600px)': {
+            fontSize: '0.875rem',
+            padding: '8px 16px',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            '@media (max-width: 600px)': {
+              fontSize: '16px', // Prevents iOS zoom
+            },
+          },
         },
       },
     },
@@ -104,7 +139,14 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`tab-${index}`}
       {...other}
     >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
+      {value === index && (
+        <Box sx={{ 
+          p: { xs: 1, sm: 2, md: 3 },
+          minHeight: { xs: 'calc(100vh - 200px)', sm: 'auto' }
+        }}>
+          {children}
+        </Box>
+      )}
     </div>
   );
 }
@@ -140,9 +182,9 @@ function Dashboard() {
   const totalProtein = todayNutrition.reduce((sum, n) => sum + n.protein, 0);
 
   return (
-    <Grid container spacing={3}>
-      <Grid item xs={12} md={8}>
-        <Grid container spacing={2}>
+    <Grid container spacing={{ xs: 2, sm: 3 }}>
+      <Grid item xs={12} lg={8}>
+        <Grid container spacing={{ xs: 1, sm: 2 }}>
           {/* Today's Workout */}
           <Grid item xs={12} md={6}>
             <Card className="slide-in">
@@ -240,7 +282,7 @@ function Dashboard() {
       </Grid>
 
       {/* AI Insights Sidebar */}
-      <Grid item xs={12} md={4}>
+      <Grid item xs={12} lg={4}>
         <Card className="slide-in">
           <CardContent>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -327,15 +369,20 @@ function WorkoutTracker() {
           variant="contained" 
           startIcon={<Add />}
           onClick={() => setShowAddDialog(true)}
-          sx={{ background: 'linear-gradient(45deg, #00e676 30%, #00c853 90%)' }}
+          sx={{ 
+            background: 'linear-gradient(45deg, #00e676 30%, #00c853 90%)',
+            minHeight: { xs: 44, sm: 36 },
+            fontSize: { xs: '0.875rem', sm: '1rem' },
+            px: { xs: 2, sm: 3 }
+          }}
         >
           New Workout
         </Button>
       </Box>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {exercises.map((exercise, index) => (
-          <Grid item xs={12} md={6} key={index}>
+          <Grid item xs={12} sm={6} md={4} key={index}>
             <Card sx={{ 
               bgcolor: index === currentExercise ? 'rgba(0, 230, 118, 0.1)' : 'background.paper',
               border: index === currentExercise ? '2px solid' : '1px solid',
@@ -372,10 +419,12 @@ function WorkoutTracker() {
           size="large" 
           onClick={completeWorkout}
           sx={{ 
-            px: 4, 
-            py: 1.5,
+            px: { xs: 2, sm: 4 }, 
+            py: { xs: 1.5, sm: 2 },
             background: 'linear-gradient(45deg, #ff4081 30%, #f50057 90%)',
-            fontSize: '1.1rem'
+            fontSize: { xs: '1rem', sm: '1.1rem' },
+            minHeight: { xs: 48, sm: 56 },
+            width: { xs: '100%', sm: 'auto' }
           }}
         >
           🏁 Complete Workout
@@ -479,9 +528,9 @@ function NutritionTracker() {
       </Card>
       
       {/* Meals List */}
-      <Grid container spacing={2}>
+      <Grid container spacing={{ xs: 1, sm: 2 }}>
         {todayNutrition.map((meal, index) => (
-          <Grid item xs={12} md={6} key={meal.id}>
+          <Grid item xs={12} sm={6} key={meal.id}>
             <Card>
               <CardContent>
                 <Typography variant="h6">{meal.meal}</Typography>
@@ -585,9 +634,9 @@ function ProgressTracker() {
         </Button>
       </Box>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Current Stats */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6}>
           <Card className="metric-card">
             <CardContent>
               <Typography variant="h6" gutterBottom>📏 Current Stats</Typography>
@@ -618,7 +667,7 @@ function ProgressTracker() {
         </Grid>
 
         {/* Progress Trend */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6}>
           <Card className="metric-card">
             <CardContent>
               <Typography variant="h6" gutterBottom>📊 Progress Trend</Typography>
@@ -767,9 +816,9 @@ function SleepTracker() {
         </Button>
       </Box>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* Sleep Summary */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6}>
           <Card className="glass-effect">
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -793,7 +842,7 @@ function SleepTracker() {
         </Grid>
 
         {/* Sleep Quality Indicator */}
-        <Grid item xs={12} md={6}>
+        <Grid item xs={12} sm={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>💤 Sleep Quality</Typography>
@@ -919,24 +968,34 @@ function AIAssistant() {
         🤖 AI Fitness Coach
       </Typography>
       
-      <Grid container spacing={3}>
+      <Grid container spacing={{ xs: 2, sm: 3 }}>
         {/* AI Chat Interface */}
-        <Grid item xs={12} md={8}>
+        <Grid item xs={12} lg={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>💬 Ask Your AI Coach</Typography>
-              <Box sx={{ display: 'flex', gap: 2, mb: 3 }}>
+              <Box sx={{ 
+                display: 'flex', 
+                flexDirection: { xs: 'column', sm: 'row' },
+                gap: { xs: 1, sm: 2 }, 
+                mb: 3 
+              }}>
                 <TextField
                   fullWidth
                   placeholder="Ask about your workout, nutrition, or progress..."
                   value={question}
                   onChange={(e) => setQuestion(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleAskAI()}
+                  size="small"
                 />
                 <Button 
                   variant="contained" 
                   onClick={handleAskAI}
                   disabled={!question.trim()}
+                  sx={{ 
+                    minWidth: { xs: '100%', sm: 'auto' },
+                    whiteSpace: 'nowrap'
+                  }}
                 >
                   Ask AI
                 </Button>
@@ -950,7 +1009,7 @@ function AIAssistant() {
         </Grid>
 
         {/* AI Insights */}
-        <Grid item xs={12} md={4}>
+        <Grid item xs={12} lg={4}>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
@@ -1167,29 +1226,61 @@ function App() {
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <AppBar position="static">
-        <Toolbar>
-          <FitnessCenter sx={{ mr: 2 }} />
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Toolbar sx={{ minHeight: { xs: 56, sm: 64 }, px: { xs: 1, sm: 2 } }}>
+          <FitnessCenter sx={{ mr: { xs: 1, sm: 2 } }} />
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              fontSize: { xs: '1rem', sm: '1.25rem' },
+              display: { xs: 'none', sm: 'block' }
+            }}
+          >
             SciOptimal Fitness - AI-Powered Training
           </Typography>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Avatar sx={{ bgcolor: 'primary.main' }}>
-              <Person />
+          <Typography 
+            variant="h6" 
+            component="div" 
+            sx={{ 
+              flexGrow: 1,
+              fontSize: '1rem',
+              display: { xs: 'block', sm: 'none' }
+            }}
+          >
+            SciOptimal
+          </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: { xs: 1, sm: 2 } }}>
+            <Avatar sx={{ bgcolor: 'primary.main', width: { xs: 32, sm: 40 }, height: { xs: 32, sm: 40 } }}>
+              <Person fontSize="small" />
             </Avatar>
-            <Typography variant="body2">
+            <Typography 
+              variant="body2" 
+              sx={{ 
+                display: { xs: 'none', sm: 'block' },
+                fontSize: { xs: '0.8rem', sm: '0.875rem' }
+              }}
+            >
               {userProfile.name}
             </Typography>
           </Box>
         </Toolbar>
       </AppBar>
 
-      <Container maxWidth="xl" sx={{ mt: 3, mb: 3 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+      <Container maxWidth="xl" sx={{ mt: { xs: 1, sm: 3 }, mb: 3, px: { xs: 1, sm: 3 } }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, sm: 3 } }}>
           <Tabs 
             value={currentTab} 
             onChange={handleTabChange} 
             variant="scrollable"
             scrollButtons="auto"
+            sx={{
+              '& .MuiTab-root': {
+                minWidth: { xs: 60, sm: 120 },
+                fontSize: { xs: '0.7rem', sm: '0.875rem' },
+                padding: { xs: '8px 4px', sm: '12px 16px' }
+              }
+            }}
           >
             <Tab icon={<DashboardIcon />} label="Dashboard" />
             <Tab icon={<FitnessCenter />} label="Workouts" />
