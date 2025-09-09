@@ -1,6 +1,8 @@
 const express = require('express');
 const cors = require('cors');
 const serverless = require('serverless-http');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 const app = express();
 
@@ -13,6 +15,7 @@ app.use(express.json());
 
 // Simple in-memory storage
 const inMemoryDB = {
+  users: new Map(),
   profiles: new Map(),
   workouts: new Map(),
   nutrition: new Map(),
@@ -21,10 +24,89 @@ const inMemoryDB = {
   trainingPhases: new Map()
 };
 
+// JWT Secret
+const JWT_SECRET = process.env.JWT_SECRET || 'scioptimal-super-secret-jwt-key-2024';
+
 // Generate simple IDs
 const generateId = () => 'id_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
 
 // Routes
+
+// Authentication Routes
+app.post('/api/auth/register', async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+    
+    if (!name || !email || !password) {
+      return res.status(400).json({ message: 'Name, email, and password are required' });
+    }
+    
+    // Check if user already exists
+    const existingUser = Array.from(inMemoryDB.users.values()).find(u => u.email === email);
+    if (existingUser) {
+      return res.status(400).json({ message: 'User already exists' });
+    }
+    
+    // Hash password
+    const hashedPassword = await bcrypt.hash(password, 10);
+    
+    // Create user
+    const userId = generateId();
+    const user = {
+      id: userId,
+      name,
+      email,
+      password: hashedPassword,
+      createdAt: new Date()
+    };
+    
+    inMemoryDB.users.set(userId, user);
+    
+    // Generate JWT token
+    const token = jwt.sign({ userId, email }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.status(201).json({
+      message: 'User created successfully',
+      token,
+      user: { id: userId, name, email }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
+
+app.post('/api/auth/login', async (req, res) => {
+  try {
+    const { email, password } = req.body;
+    
+    if (!email || !password) {
+      return res.status(400).json({ message: 'Email and password are required' });
+    }
+    
+    // Find user
+    const user = Array.from(inMemoryDB.users.values()).find(u => u.email === email);
+    if (!user) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    // Check password
+    const isValidPassword = await bcrypt.compare(password, user.password);
+    if (!isValidPassword) {
+      return res.status(401).json({ message: 'Invalid credentials' });
+    }
+    
+    // Generate JWT token
+    const token = jwt.sign({ userId: user.id, email }, JWT_SECRET, { expiresIn: '7d' });
+    
+    res.json({
+      message: 'Login successful',
+      token,
+      user: { id: user.id, name: user.name, email: user.email }
+    });
+  } catch (error) {
+    res.status(500).json({ message: 'Server error', error: error.message });
+  }
+});
 
 // Simple Profile Creation (no auth required for now)
 app.post('/api/user/profile', async (req, res) => {

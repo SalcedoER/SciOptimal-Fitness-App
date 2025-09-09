@@ -1,58 +1,240 @@
-/* SciOptimal Fitness App Styles */
+/* SciOptimal Fitness App - Simple Black & White */
 
-.App {
-  text-align: center;
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+html, body, #root {
+  height: 100%;
+  background: #000000 !important;
+  color: #ffffff !important;
+  font-family: Arial, sans-serif !important;
+  font-size: 14px !important;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+/* Override ALL Material-UI to be simple black/white */
+.MuiAppBar-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border-bottom: 1px solid #333333 !important;
 }
 
-.App-header {
-  background-color: #282c34;
-  padding: 20px;
-  color: white;
+.MuiCard-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #333333 !important;
+  margin: 10px 0 !important;
 }
 
-.App-link {
-  color: #61dafb;
+.MuiTypography-root {
+  color: #ffffff !important;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.MuiButton-root {
+  background: #333333 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+  padding: 8px 16px !important;
+  margin: 5px !important;
 }
 
-/* Custom styles for fitness app */
+.MuiButton-outlined {
+  background: #000000 !important;
+  border: 1px solid #555555 !important;
+  color: #ffffff !important;
+}
+
+.MuiChip-root {
+  background: #333333 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-root {
+  color: #ffffff !important;
+  background: #000000 !important;
+  border: 1px solid #555555 !important;
+}
+
+.MuiTextField-root .MuiOutlinedInput-notchedOutline {
+  border-color: #555555 !important;
+}
+
+.MuiTextField-root .MuiInputLabel-root {
+  color: #aaaaaa !important;
+}
+
+.MuiContainer-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.MuiTabs-root {
+  background: #000000 !important;
+  border-bottom: 1px solid #333333 !important;
+}
+
+.MuiTab-root {
+  color: #aaaaaa !important;
+  background: #000000 !important;
+}
+
+.MuiTab-root.Mui-selected {
+  color: #ffffff !important;
+  background: #000000 !important;
+}
+
+.MuiLinearProgress-root {
+  background: #333333 !important;
+}
+
+.MuiLinearProgress-bar {
+  background: #ffffff !important;
+}
+
+.MuiDialog-paper {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #333333 !important;
+}
+
+.MuiAlert-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #333333 !important;
+}
+
+.MuiCircularProgress-root {
+  color: #ffffff !important;
+}
+
+.MuiAvatar-root {
+  background: #333333 !important;
+  color: #ffffff !important;
+}
+
+.MuiListItem-root {
+  color: #ffffff !important;
+  background: #000000 !important;
+}
+
+.MuiListItemIcon-root {
+  color: #ffffff !important;
+}
+
+.MuiListItemText-root {
+  color: #ffffff !important;
+}
+
+.MuiDivider-root {
+  background: #333333 !important;
+}
+
+.MuiAccordion-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+  border: 1px solid #333333 !important;
+}
+
+.MuiAccordionSummary-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.MuiAccordionDetails-root {
+  background: #000000 !important;
+  color: #ffffff !important;
+}
+
+.MuiStepper-root {
+  background: #000000 !important;
+}
+
+.MuiStepLabel-root {
+  color: #ffffff !important;
+}
+
+.MuiStepIcon-root {
+  color: #555555 !important;
+}
+
+.MuiStepIcon-root.Mui-active {
+  color: #ffffff !important;
+}
+
+.MuiStepIcon-root.Mui-completed {
+  color: #ffffff !important;
+}
+
+.MuiBadge-root {
+  color: #ffffff !important;
+}
+
+.MuiBadge-badge {
+  background: #333333 !important;
+  color: #ffffff !important;
+}
+
+/* Simple custom classes */
 .fitness-card {
-  transition: transform 0.2s ease-in-out;
-}
-
-.fitness-card:hover {
-  transform: translateY(-2px);
-}
-
-.progress-indicator {
-  border-radius: 10px;
+  background: #000000 !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+  padding: 10px !important;
+  margin: 10px 0 !important;
 }
 
 .metric-card {
-  background: linear-gradient(135deg, rgba(0, 230, 118, 0.1) 0%, rgba(255, 64, 129, 0.1) 100%);
-  border: 1px solid rgba(0, 230, 118, 0.2);
+  background: #000000 !important;
+  border: 1px solid #333333 !important;
+  color: #ffffff !important;
+  padding: 10px !important;
+  margin: 10px 0 !important;
 }
 
-.ai-recommendation {
-  background: linear-gradient(135deg, rgba(156, 39, 176, 0.1) 0%, rgba(63, 81, 181, 0.1) 100%);
-  border-left: 4px solid #9c27b0;
+.text-gradient {
+  color: #ffffff !important;
+  font-weight: bold !important;
+}
+
+.gradient-button {
+  background: #333333 !important;
+  color: #ffffff !important;
+  border: 1px solid #555555 !important;
+}
+
+.glass-effect {
+  background: #000000 !important;
+  border: 1px solid #333333 !important;
+}
+
+.status-online {
+  color: #ffffff !important;
+}
+
+.status-offline {
+  color: #aaaaaa !important;
+}
+
+/* Remove all fancy effects */
+.slide-in {
+  /* No animation */
+}
+
+/* Mobile */
+@media (max-width: 768px) {
+  .MuiContainer-root {
+    padding: 5px !important;
+  }
+  
+  .MuiCard-root {
+    margin: 5px 0 !important;
+    padding: 5px !important;
+  }
+  
+  body {
+    font-size: 12px !important;
+  }
 }
