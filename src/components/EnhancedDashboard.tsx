@@ -17,13 +17,11 @@ import {
   Alert,
   CircularProgress,
   IconButton,
-  Tooltip,
   Badge
 } from '@mui/material';
 import {
   FitnessCenter,
   Restaurant,
-  TrendingUp,
   Psychology,
   Watch,
   Sync,
@@ -33,12 +31,13 @@ import {
   Schedule,
   Speed,
   MonitorHeart,
-  LocalFireDepartment,
-  Bedtime,
-  Timer
+  Edit
 } from '@mui/icons-material';
 import { useAppStore } from '../store';
 import { format } from 'date-fns';
+import WorkoutEditor from './WorkoutEditor';
+import FoodLogger from './FoodLogger';
+import WorkoutTracker from './WorkoutTracker';
 
 // Enhanced Dashboard with Apple Watch Integration and Smart AI
 export default function EnhancedDashboard() {
@@ -55,22 +54,89 @@ export default function EnhancedDashboard() {
     adaptivePlan,
     aiAnalysis,
     isOptimizing,
+    todaysWorkout,
     syncHealthData,
-    runAIOptimization
+    runAIOptimization,
+    generateTodaysWorkout
   } = useAppStore();
 
   const [isSyncing, setIsSyncing] = useState(false);
+  const [showWorkoutEditor, setShowWorkoutEditor] = useState(false);
+  const [editingWorkout, setEditingWorkout] = useState(null);
+  const [showFoodLogger, setShowFoodLogger] = useState(false);
+  const [editingFood, setEditingFood] = useState(null);
+  const [workoutAccepted, setWorkoutAccepted] = useState(false);
+  const [isGeneratingWorkout, setIsGeneratingWorkout] = useState(false);
+  const [showWorkoutTracker, setShowWorkoutTracker] = useState(false);
 
   useEffect(() => {
     if (userProfile && !isOptimizing) {
+      console.log('Running AI optimization...');
       runAIOptimization();
     }
-  }, [userProfile, workoutHistory, nutritionLog, progressHistory, sleepLog]);
+  }, [userProfile, isOptimizing, runAIOptimization]);
 
   const handleSyncHealthData = async () => {
     setIsSyncing(true);
     await syncHealthData();
     setIsSyncing(false);
+  };
+
+  const handleAddWorkout = () => {
+    setEditingWorkout(null);
+    setShowWorkoutEditor(true);
+  };
+
+  const handleEditWorkout = (workout: any) => {
+    setEditingWorkout(workout);
+    setShowWorkoutEditor(true);
+  };
+
+  const handleAddFood = () => {
+    setEditingFood(null);
+    setShowFoodLogger(true);
+  };
+
+  const handleEditFood = (food: any) => {
+    setEditingFood(food);
+    setShowFoodLogger(true);
+  };
+
+  const handleAcceptWorkout = () => {
+    console.log('Accepting workout...');
+    setWorkoutAccepted(true);
+    // You could also add the workout to workoutHistory here if desired
+  };
+
+  const handleChangeWorkout = async () => {
+    console.log('Changing workout...');
+    setIsGeneratingWorkout(true);
+    try {
+      generateTodaysWorkout();
+      setWorkoutAccepted(false);
+      // Add a small delay to show the loading state
+      setTimeout(() => {
+        setIsGeneratingWorkout(false);
+      }, 1000);
+    } catch (error) {
+      console.error('Error generating workout:', error);
+      setIsGeneratingWorkout(false);
+    }
+  };
+
+  const handleStartWorkout = () => {
+    setShowWorkoutTracker(true);
+  };
+
+  const handleWorkoutComplete = (completedWorkout: any) => {
+    setShowWorkoutTracker(false);
+    setWorkoutAccepted(false); // Reset so they can generate a new workout
+    // The workout is already added to history by the WorkoutTracker
+  };
+
+  const handleCancelWorkout = () => {
+    setShowWorkoutTracker(false);
+    // Don't reset workoutAccepted so they can try again
   };
 
   const todayWorkouts = workoutHistory.filter(w => 
@@ -83,6 +149,8 @@ export default function EnhancedDashboard() {
 
   const totalCalories = todayNutrition.reduce((sum, n) => sum + n.calories, 0);
   const totalProtein = todayNutrition.reduce((sum, n) => sum + n.protein, 0);
+  const totalCarbs = todayNutrition.reduce((sum, n) => sum + n.carbs, 0);
+  const totalFat = todayNutrition.reduce((sum, n) => sum + n.fat, 0);
 
   // Health metrics from Apple Watch
   const todaySteps = healthData?.steps.find((s: any) => 
@@ -221,15 +289,278 @@ export default function EnhancedDashboard() {
       <Grid item xs={12} md={6}>
         <Card className="slide-in">
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <FitnessCenter sx={{ mr: 1, color: 'primary.main' }} />
-              <Typography variant="h6">Today's Workout</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <FitnessCenter sx={{ mr: 1, color: 'primary.main' }} />
+                <Typography variant="h6">Today's Workout</Typography>
+              </Box>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleAddWorkout}
+                sx={{
+                  background: '#ffffff !important',
+                  color: '#000000 !important',
+                  '&:hover': {
+                    background: '#cccccc !important'
+                  }
+                }}
+              >
+                Add Workout
+              </Button>
             </Box>
-            {todayWorkouts.length > 0 ? (
+            {todaysWorkout ? (
               <Box>
-                <Typography variant="body1" gutterBottom>
-                  {todayWorkouts[0].name}
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body1" sx={{ color: '#ffffff !important' }}>
+                    {todaysWorkout.name}
+                  </Typography>
+                  <Chip 
+                    label={todaysWorkout.difficulty} 
+                    color="primary" 
+                    size="small" 
+                  />
+                </Box>
+                <Typography variant="body2" color="text.secondary" gutterBottom>
+                  {todaysWorkout.focus} • {todaysWorkout.exercises.length} exercises • {todaysWorkout.duration} min
                 </Typography>
+                <Typography variant="body2" color="primary.main" gutterBottom>
+                  {todaysWorkout.adaptationReason}
+                </Typography>
+                
+                <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
+                  <Chip 
+                    label={`${todaysWorkout.totalCalories} cal`} 
+                    color="secondary" 
+                    size="small"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                  <Chip 
+                    label={`${todaysWorkout.difficulty}`} 
+                    color="primary" 
+                    size="small"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                  <Chip 
+                    label={`${todaysWorkout.exercises.length} exercises`} 
+                    color="info" 
+                    size="small"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                  <Chip 
+                    label={`${todaysWorkout.duration} min`} 
+                    color="warning" 
+                    size="small"
+                    sx={{ fontWeight: 'bold' }}
+                  />
+                </Box>
+                
+                <Typography variant="subtitle2" gutterBottom sx={{ color: '#ffffff !important' }}>
+                  Exercises:
+                </Typography>
+                <Box sx={{ maxHeight: 120, overflowY: 'auto', background: 'rgba(0, 0, 0, 0.2)', borderRadius: 1, p: 1 }}>
+                  {todaysWorkout.exercises.slice(0, 4).map((exercise, index) => (
+                    <Box key={exercise.id} sx={{ 
+                      display: 'flex', 
+                      justifyContent: 'space-between', 
+                      alignItems: 'center',
+                      mb: 1, 
+                      p: 1,
+                      background: 'rgba(255, 255, 255, 0.05)',
+                      borderRadius: 1,
+                      border: '1px solid rgba(255, 255, 255, 0.1)'
+                    }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{ 
+                          width: 24, 
+                          height: 24, 
+                          borderRadius: '50%', 
+                          background: 'linear-gradient(45deg, #ff6b6b, #ffa500)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          mr: 1
+                        }}>
+                          <Typography variant="caption" sx={{ color: '#ffffff', fontWeight: 'bold' }}>
+                            {index + 1}
+                          </Typography>
+                        </Box>
+                        <Typography variant="body2" sx={{ color: '#ffffff !important', fontWeight: '500' }}>
+                          {exercise.name}
+                        </Typography>
+                      </Box>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <Chip 
+                          label={`${exercise.sets} sets`} 
+                          size="small" 
+                          sx={{ 
+                            background: 'rgba(76, 175, 80, 0.2) !important',
+                            color: '#4caf50 !important',
+                            fontWeight: 'bold'
+                          }} 
+                        />
+                        <Chip 
+                          label={`${exercise.reps} reps`} 
+                          size="small" 
+                          sx={{ 
+                            background: 'rgba(33, 150, 243, 0.2) !important',
+                            color: '#2196f3 !important',
+                            fontWeight: 'bold'
+                          }} 
+                        />
+                      </Box>
+                    </Box>
+                  ))}
+                  {todaysWorkout.exercises.length > 4 && (
+                    <Box sx={{ textAlign: 'center', mt: 1 }}>
+                      <Chip 
+                        label={`+${todaysWorkout.exercises.length - 4} more exercises`} 
+                        color="info" 
+                        size="small"
+                        sx={{ fontWeight: 'bold' }}
+                      />
+                    </Box>
+                  )}
+                </Box>
+                
+                {/* Enhanced Accept/Change Workout Section */}
+                <Box sx={{ mt: 3, p: 2, background: 'rgba(255, 255, 255, 0.05)', borderRadius: 2, border: '1px solid rgba(255, 255, 255, 0.1)' }}>
+                  {!workoutAccepted ? (
+                    <Box>
+                      <Typography variant="subtitle2" sx={{ color: '#ffffff !important', mb: 2, textAlign: 'center' }}>
+                        Ready to start this workout?
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center' }}>
+                        <Button
+                          variant="contained"
+                          color="success"
+                          onClick={handleAcceptWorkout}
+                          startIcon={<CheckCircle />}
+                          sx={{
+                            background: 'linear-gradient(45deg, #4caf50 30%, #66bb6a 90%) !important',
+                            color: '#ffffff !important',
+                            px: 3,
+                            py: 1,
+                            borderRadius: 3,
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 15px rgba(76, 175, 80, 0.3)',
+                            '&:hover': {
+                              background: 'linear-gradient(45deg, #45a049 30%, #5cb85c 90%) !important',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 6px 20px rgba(76, 175, 80, 0.4)',
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          Accept & Start
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={handleChangeWorkout}
+                          disabled={isGeneratingWorkout}
+                          startIcon={isGeneratingWorkout ? <CircularProgress size={16} /> : <Sync />}
+                          sx={{
+                            borderColor: '#ffffff !important',
+                            color: '#ffffff !important',
+                            px: 3,
+                            py: 1,
+                            borderRadius: 3,
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            borderWidth: 2,
+                            '&:hover': {
+                              borderColor: '#ff9800 !important',
+                              color: '#ff9800 !important',
+                              background: 'rgba(255, 152, 0, 0.1) !important',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 6px 20px rgba(255, 152, 0, 0.3)',
+                            },
+                            '&:disabled': {
+                              borderColor: 'rgba(255, 255, 255, 0.3) !important',
+                              color: 'rgba(255, 255, 255, 0.5) !important',
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          {isGeneratingWorkout ? 'Generating...' : 'Generate New'}
+                        </Button>
+                      </Box>
+                    </Box>
+                  ) : (
+                    <Box sx={{ textAlign: 'center' }}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', mb: 2 }}>
+                        <CheckCircle sx={{ color: '#4caf50', fontSize: 24, mr: 1 }} />
+                        <Typography variant="h6" color="success.main" sx={{ fontWeight: 'bold' }}>
+                          Workout Accepted! 🎯
+                        </Typography>
+                      </Box>
+                      <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
+                        You're all set to crush this workout. Let's go! 💪
+                      </Typography>
+                      <Box sx={{ display: 'flex', gap: 2, justifyContent: 'center', flexWrap: 'wrap' }}>
+                        <Button
+                          variant="contained"
+                          onClick={handleStartWorkout}
+                          startIcon={<FitnessCenter />}
+                          sx={{
+                            background: 'linear-gradient(45deg, #ff6b6b 30%, #ff8e53 90%) !important',
+                            color: '#ffffff !important',
+                            px: 3,
+                            py: 1,
+                            borderRadius: 3,
+                            textTransform: 'none',
+                            fontWeight: 'bold',
+                            boxShadow: '0 4px 15px rgba(255, 107, 107, 0.3)',
+                            '&:hover': {
+                              background: 'linear-gradient(45deg, #ff5252 30%, #ff7043 90%) !important',
+                              transform: 'translateY(-2px)',
+                              boxShadow: '0 6px 20px rgba(255, 107, 107, 0.4)',
+                            },
+                            transition: 'all 0.3s ease'
+                          }}
+                        >
+                          Start Workout
+                        </Button>
+                        <Button
+                          variant="outlined"
+                          onClick={handleChangeWorkout}
+                          startIcon={<Sync />}
+                          sx={{
+                            borderColor: '#ff9800 !important',
+                            color: '#ff9800 !important',
+                            px: 2,
+                            py: 1,
+                            borderRadius: 2,
+                            textTransform: 'none',
+                            '&:hover': {
+                              background: 'rgba(255, 152, 0, 0.1) !important',
+                              transform: 'translateY(-1px)',
+                            },
+                            transition: 'all 0.2s ease'
+                          }}
+                        >
+                          Try Different
+                        </Button>
+                      </Box>
+                    </Box>
+                  )}
+                </Box>
+              </Box>
+            ) : todayWorkouts.length > 0 ? (
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+                  <Typography variant="body1" sx={{ color: '#ffffff !important' }}>
+                    {todayWorkouts[0].name}
+                  </Typography>
+                  <IconButton
+                    size="small"
+                    onClick={() => handleEditWorkout(todayWorkouts[0])}
+                    sx={{ color: '#ffffff !important' }}
+                  >
+                    <Edit />
+                  </IconButton>
+                </Box>
                 <Typography variant="body2" color="text.secondary">
                   {todayWorkouts[0].exercises.length} exercises • {todayWorkouts[0].duration} min
                 </Typography>
@@ -247,9 +578,24 @@ export default function EnhancedDashboard() {
                 </Box>
               </Box>
             ) : (
-              <Typography variant="body2" color="text.secondary">
-                No workout scheduled for today
-              </Typography>
+              <Box sx={{ textAlign: 'center', py: 2 }}>
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  No workout scheduled for today
+                </Typography>
+                <Button
+                  variant="outlined"
+                  onClick={handleAddWorkout}
+                  sx={{
+                    borderColor: '#333333 !important',
+                    color: '#ffffff !important',
+                    '&:hover': {
+                      borderColor: '#555555 !important'
+                    }
+                  }}
+                >
+                  Plan Your Workout
+                </Button>
+              </Box>
             )}
           </CardContent>
         </Card>
@@ -259,9 +605,25 @@ export default function EnhancedDashboard() {
       <Grid item xs={12} md={6}>
         <Card className="slide-in">
           <CardContent>
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-              <Restaurant sx={{ mr: 1, color: 'secondary.main' }} />
-              <Typography variant="h6">Nutrition Today</Typography>
+            <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 2 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <Restaurant sx={{ mr: 1, color: 'secondary.main' }} />
+                <Typography variant="h6">Nutrition Today</Typography>
+              </Box>
+              <Button
+                variant="contained"
+                size="small"
+                onClick={handleAddFood}
+                sx={{
+                  background: '#ffffff !important',
+                  color: '#000000 !important',
+                  '&:hover': {
+                    background: '#cccccc !important'
+                  }
+                }}
+              >
+                Log Food
+              </Button>
             </Box>
             <Typography variant="h4" color="primary.main">
               {totalCalories}
@@ -269,10 +631,49 @@ export default function EnhancedDashboard() {
             <Typography variant="body2" color="text.secondary" gutterBottom>
               calories consumed
             </Typography>
-            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-              <Chip label={`Protein: ${totalProtein}g`} size="small" />
+            <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', mb: 2 }}>
+              <Chip label={`Protein: ${totalProtein.toFixed(0)}g`} size="small" />
+              <Chip label={`Carbs: ${totalCarbs.toFixed(0)}g`} size="small" />
+              <Chip label={`Fat: ${totalFat.toFixed(0)}g`} size="small" />
               <Chip label={`${todayNutrition.length} meals`} size="small" variant="outlined" />
             </Box>
+            
+            {/* Recent Food Entries */}
+            {todayNutrition.length > 0 && (
+              <Box>
+                <Typography variant="subtitle2" sx={{ color: '#ffffff !important', mb: 1 }}>
+                  Recent Entries:
+                </Typography>
+                {todayNutrition.slice(-3).map((entry, index) => (
+                  <Box key={entry.id} sx={{ 
+                    display: 'flex', 
+                    alignItems: 'center', 
+                    justifyContent: 'space-between',
+                    py: 0.5,
+                    px: 1,
+                    background: '#111111',
+                    borderRadius: '4px',
+                    mb: 0.5
+                  }}>
+                    <Typography variant="body2" sx={{ color: '#ffffff !important' }}>
+                      {entry.food} • {entry.calories} cal
+                    </Typography>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleEditFood(entry)}
+                      sx={{ color: '#ffffff !important' }}
+                    >
+                      <Edit />
+                    </IconButton>
+                  </Box>
+                ))}
+                {todayNutrition.length > 3 && (
+                  <Typography variant="caption" sx={{ color: '#cccccc !important' }}>
+                    +{todayNutrition.length - 3} more entries
+                  </Typography>
+                )}
+              </Box>
+            )}
           </CardContent>
         </Card>
       </Grid>
@@ -333,8 +734,8 @@ export default function EnhancedDashboard() {
                             </Typography>
                             <Box sx={{ mt: 1 }}>
                               <Typography variant="caption" color="text.secondary">
-                                Expected Impact: {insight.expectedImpact}% • 
-                                Data Points: {insight.dataPoints.join(', ')}
+                                Expected Impact: {insight.expectedImpact || 'N/A'}% • 
+                                Data Points: {insight.dataPoints ? insight.dataPoints.join(', ') : 'N/A'}
                               </Typography>
                             </Box>
                           </Box>
@@ -402,6 +803,37 @@ export default function EnhancedDashboard() {
             </CardContent>
           </Card>
         </Grid>
+      )}
+
+      {/* Workout Editor Modal */}
+      <WorkoutEditor
+        open={showWorkoutEditor}
+        onClose={() => {
+          setShowWorkoutEditor(false);
+          setEditingWorkout(null);
+        }}
+        workout={editingWorkout}
+        isEditing={!!editingWorkout}
+      />
+
+      {/* Food Logger Modal */}
+      <FoodLogger
+        open={showFoodLogger}
+        onClose={() => {
+          setShowFoodLogger(false);
+          setEditingFood(null);
+        }}
+        entry={editingFood}
+        isEditing={!!editingFood}
+      />
+
+      {/* Workout Tracker Modal */}
+      {todaysWorkout && showWorkoutTracker && (
+        <WorkoutTracker
+          workout={todaysWorkout}
+          onComplete={handleWorkoutComplete}
+          onClose={handleCancelWorkout}
+        />
       )}
     </Grid>
   );

@@ -23,6 +23,7 @@ import {
   Save
 } from '@mui/icons-material';
 import { useAppStore, UserProfile } from '../store';
+import { goalCurationService, CuratedPlan } from '../services/goalCuration';
 
 export default function ProfileSetup() {
   const { setUserProfile, user } = useAppStore();
@@ -76,6 +77,12 @@ export default function ProfileSetup() {
         createdAt: new Date()
       };
 
+      // Generate curated plan based on goal
+      const curatedPlan = await goalCurationService.curatePlan(profile);
+      
+      // Store the curated plan in localStorage for now (in a real app, this would go to a database)
+      localStorage.setItem('curatedPlan', JSON.stringify(curatedPlan));
+      
       setUserProfile(profile);
       setLoading(false);
     } catch (err: any) {
@@ -96,7 +103,8 @@ export default function ProfileSetup() {
 
   const physiqueOptions = [
     'Lean & Toned', 'Muscular', 'Athletic', 'Strength Focused',
-    'Endurance Focused', 'Weight Loss', 'Weight Gain', 'Maintenance'
+    'Endurance Focused', 'Weight Loss', 'Weight Gain', 'Maintenance',
+    'NFL Fullback', 'Power Athlete', 'Functional Strength'
   ];
 
   return (

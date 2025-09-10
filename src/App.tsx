@@ -31,7 +31,10 @@ import {
   CloudSync,
   HealthAndSafety,
   Settings,
-  Menu as MenuIcon
+  Menu as MenuIcon,
+  Person,
+  SmartToy,
+  MonitorHeart
 } from '@mui/icons-material';
 import { useAppStore } from './store';
 import EnhancedDashboard from './components/EnhancedDashboard';
@@ -39,6 +42,9 @@ import AIOptimizationPanel from './components/AIOptimizationPanel';
 import AuthModal from './components/AuthModal';
 import ResearchPanel from './components/ResearchPanel';
 import ProfileSetup from './components/ProfileSetup';
+import ProfilePage from './components/ProfilePage';
+import AIChat from './components/AIChat';
+import SmartDashboard from './components/SmartDashboard';
 import './App.css';
 
 // Create a comprehensive theme
@@ -205,8 +211,11 @@ function App() {
   // Navigation items
   const navigationItems = [
     { label: 'Dashboard', icon: <FitnessCenter />, value: 0 },
-    { label: 'Optimize', icon: <Speed />, value: 1 },
-    { label: 'Research', icon: <Science />, value: 2 },
+    { label: 'AI Coach', icon: <SmartToy />, value: 1 },
+    { label: 'Smart Dashboard', icon: <MonitorHeart />, value: 2 },
+    { label: 'Profile', icon: <Person />, value: 3 },
+    { label: 'Optimize', icon: <Speed />, value: 4 },
+    { label: 'Research', icon: <Science />, value: 5 },
   ];
 
   // Drawer content
@@ -256,12 +265,23 @@ function App() {
   // Render content based on tab
   const renderTabContent = () => {
     try {
+      // Show profile setup if user is authenticated but has no profile
+      if (isAuthenticated && !userProfile) {
+        return <ProfileSetup />;
+      }
+      
       switch (currentTab) {
         case 0:
           return <EnhancedDashboard />;
         case 1:
-          return <AIOptimizationPanel />;
+          return <AIChat />;
         case 2:
+          return <SmartDashboard />;
+        case 3:
+          return <ProfilePage />;
+        case 4:
+          return <AIOptimizationPanel />;
+        case 5:
           return <ResearchPanel />;
         default:
           return <EnhancedDashboard />;
@@ -474,4 +494,4 @@ function AppWithErrorBoundary() {
   );
 }
 
-export default AppWithErrorBoundary;
+export default AppWithErrorBoundary;// Force rebuild Tue Sep  9 08:06:59 PM EDT 2025

@@ -1,6 +1,7 @@
 // Complete working store
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { workoutGeneratorService, GeneratedWorkout } from './services/workoutGenerator';
 
 // Export all types
 export interface UserProfile {
@@ -153,6 +154,9 @@ interface AppState {
   aiAnalysis: AIAnalysis | null;
   isOptimizing: boolean;
   
+  // Generated Workout
+  todaysWorkout: GeneratedWorkout | null;
+  
   // UI State
   currentTab: number;
   
@@ -167,6 +171,7 @@ interface AppState {
   
   // Data actions
   addWorkout: (workout: WorkoutSession) => void;
+  addWorkoutSession: (workout: WorkoutSession) => void; // Alias for addWorkout
   addNutritionEntry: (entry: NutritionEntry) => void;
   addProgressEntry: (entry: ProgressEntry) => void;
   addSleepEntry: (entry: SleepEntry) => void;
@@ -182,6 +187,9 @@ interface AppState {
   setAIAnalysis: (analysis: AIAnalysis) => void;
   setIsOptimizing: (optimizing: boolean) => void;
   runAIOptimization: () => Promise<void>;
+  
+  // Workout generation
+  generateTodaysWorkout: () => void;
 }
 
 export const useAppStore = create<AppState>()(
@@ -212,6 +220,9 @@ export const useAppStore = create<AppState>()(
       adaptivePlan: null,
       aiAnalysis: null,
       isOptimizing: false,
+      
+      // Generated Workout
+      todaysWorkout: null,
 
       // Actions
       login: async (email, password) => {
@@ -225,6 +236,8 @@ export const useAppStore = create<AppState>()(
             authLoading: false,
             showAuthModal: false
           });
+          // Only load user data if profile exists (for existing users)
+          // New users will have userProfile as null and will be directed to setup
         } catch (error: any) {
           set({ 
             authError: error.message || 'Login failed',
@@ -241,6 +254,7 @@ export const useAppStore = create<AppState>()(
           set({ 
             isAuthenticated: true, 
             user: { id: '1', name, email },
+            userProfile: null, // Keep profile null so user goes to setup
             authLoading: false,
             showAuthModal: false
           });
@@ -261,28 +275,74 @@ export const useAppStore = create<AppState>()(
       },
       
       setShowAuthModal: (show) => set({ showAuthModal: show }),
-      setUserProfile: (profile) => set({ userProfile: profile }),
+      setUserProfile: (profile) => {
+        // Create adaptive plan when profile is set
+        const adaptivePlan: AdaptivePlan = {
+          id: `plan_${Date.now()}`,
+          userId: profile.id,
+          currentPhase: 'foundation',
+          adjustments: [],
+          lastUpdated: new Date(),
+          nextReview: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 1 week from now
+        };
+        
+        // Generate today's workout based on profile
+        const generatedWorkout = workoutGeneratorService.generateWorkout(profile, []);
+        
+        set({ 
+          userProfile: profile,
+          adaptivePlan: adaptivePlan,
+          todaysWorkout: generatedWorkout
+        });
+      },
       setCurrentTab: (tab) => set({ currentTab: tab }),
       loadUserData: async () => {
         // Simulate loading user data
         await new Promise(resolve => setTimeout(resolve, 500));
-        // Mock user profile data
-        const mockProfile: UserProfile = {
-          id: '1',
-          name: 'Test User',
-          age: 25,
-          height: 175,
-          weight: 70,
-          bodyFatPercentage: 15,
-          targetPhysique: 'Athletic',
-          activityLevel: 'Moderately Active',
-          createdAt: new Date()
-        };
-        set({ userProfile: mockProfile });
+        // For demo purposes, simulate that existing users have profiles
+        // In a real app, this would check if the user has a profile in the database
+        const hasExistingProfile = Math.random() > 0.7; // 30% chance of having existing profile
+        
+        if (hasExistingProfile) {
+          const mockProfile: UserProfile = {
+            id: '1',
+            name: 'Test User',
+            age: 25,
+            height: 175,
+            weight: 70,
+            bodyFatPercentage: 15,
+            targetPhysique: 'Athletic',
+            activityLevel: 'Moderately Active',
+            createdAt: new Date()
+          };
+          
+          // Create adaptive plan for existing user
+          const adaptivePlan: AdaptivePlan = {
+            id: `plan_${Date.now()}`,
+            userId: mockProfile.id,
+            currentPhase: 'foundation',
+            adjustments: [],
+            lastUpdated: new Date(),
+            nextReview: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000) // 1 week from now
+          };
+          
+          // Generate today's workout for existing user
+          const generatedWorkout = workoutGeneratorService.generateWorkout(mockProfile, []);
+          
+          set({ 
+            userProfile: mockProfile,
+            adaptivePlan: adaptivePlan,
+            todaysWorkout: generatedWorkout
+          });
+        }
+        // If no existing profile, userProfile remains null and user goes to setup
       },
       
       // Data actions
       addWorkout: (workout) => set((state) => ({
+        workoutHistory: [...state.workoutHistory, workout]
+      })),
+      addWorkoutSession: (workout) => set((state) => ({
         workoutHistory: [...state.workoutHistory, workout]
       })),
       addNutritionEntry: (entry) => set((state) => ({
@@ -321,7 +381,72 @@ export const useAppStore = create<AppState>()(
         set({ isOptimizing: true });
         // Simulate AI optimization
         await new Promise(resolve => setTimeout(resolve, 2000));
-        set({ isOptimizing: false });
+        
+        // Generate sample optimization insights
+        const sampleInsights: OptimizationInsight[] = [
+          {
+            id: `insight_${Date.now()}_1`,
+            type: 'workout',
+            priority: 'high',
+            title: 'Increase Training Frequency',
+            description: 'Based on your current activity level, consider adding one more workout session per week to optimize muscle growth.',
+            impact: 8,
+            effort: 6,
+            timeframe: '2-4 weeks',
+            evidence: ['Current frequency: 3x/week', 'Optimal for your goal: 4-5x/week']
+          },
+          {
+            id: `insight_${Date.now()}_2`,
+            type: 'nutrition',
+            priority: 'medium',
+            title: 'Optimize Protein Timing',
+            description: 'Distribute protein intake more evenly throughout the day for better muscle protein synthesis.',
+            impact: 6,
+            effort: 4,
+            timeframe: '1-2 weeks',
+            evidence: ['Current protein distribution', 'Research on MPS optimization']
+          },
+          {
+            id: `insight_${Date.now()}_3`,
+            type: 'recovery',
+            priority: 'low',
+            title: 'Improve Sleep Quality',
+            description: 'Focus on sleep hygiene to enhance recovery and performance.',
+            impact: 5,
+            effort: 3,
+            timeframe: '1-3 weeks',
+            evidence: ['Sleep tracking data', 'Recovery metrics']
+          }
+        ];
+        
+        // Generate sample AI analysis
+        const sampleAnalysis: AIAnalysis = {
+          id: `analysis_${Date.now()}`,
+          userId: '1',
+          overallScore: 75,
+          riskFactors: ['Insufficient training volume', 'Suboptimal protein timing'],
+          opportunities: ['Increase training frequency', 'Optimize nutrition timing', 'Improve sleep quality'],
+          recommendations: ['Add one more workout per week', 'Distribute protein intake evenly', 'Focus on sleep hygiene'],
+          generatedAt: new Date()
+        };
+        
+        set({ 
+          isOptimizing: false,
+          optimizationInsights: sampleInsights,
+          aiAnalysis: sampleAnalysis
+        });
+      },
+      
+      // Workout generation
+      generateTodaysWorkout: () => {
+        const state = get();
+        if (state.userProfile) {
+          const generatedWorkout = workoutGeneratorService.generateWorkout(
+            state.userProfile, 
+            state.workoutHistory
+          );
+          set({ todaysWorkout: generatedWorkout });
+        }
       },
     }),
     {
@@ -340,6 +465,7 @@ export const useAppStore = create<AppState>()(
         optimizationInsights: state.optimizationInsights,
         adaptivePlan: state.adaptivePlan,
         aiAnalysis: state.aiAnalysis,
+        todaysWorkout: state.todaysWorkout,
       }),
     }
   )

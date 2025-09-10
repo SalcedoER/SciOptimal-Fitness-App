@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SciOptimal App Test</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .test-result { margin: 10px 0; padding: 10px; border-radius: 5px; }
+        .success { background-color: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .info { background-color: #d1ecf1; color: #0c5460; border: 1px solid #bee5eb; }
+        iframe { width: 100%; height: 600px; border: 1px solid #ccc; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <h1>SciOptimal App Test</h1>
+    
+    <div class="test-result info">
+        <strong>Test Instructions:</strong>
+        <ol>
+            <li>Click "Open App" below to test the actual app</li>
+            <li>Try registering a new account</li>
+            <li>Complete the profile setup with "NFL Fullback" goal</li>
+            <li>Check if you see the generated workout on the dashboard</li>
+            <li>Test the workout editing and food logging features</li>
+        </ol>
+    </div>
+    
+    <div class="test-result info">
+        <strong>Expected Features:</strong>
+        <ul>
+            <li>✅ Login/Registration forms</li>
+            <li>✅ Profile setup with NFL Fullback option</li>
+            <li>✅ Personalized workout generation</li>
+            <li>✅ Adaptive plan display</li>
+            <li>✅ Workout editing capabilities</li>
+            <li>✅ Food logging functionality</li>
+            <li>✅ Scientific exercise recommendations</li>
+        </ul>
+    </div>
+    
+    <button onclick="openApp()" style="padding: 10px 20px; font-size: 16px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer;">
+        Open SciOptimal App
+    </button>
+    
+    <div id="app-container"></div>
+    
+    <script>
+        function openApp() {
+            const container = document.getElementById('app-container');
+            container.innerHTML = `
+                <h3>SciOptimal Fitness App</h3>
+                <iframe src="https://scioptimal-fitness-app.netlify.app" title="SciOptimal App"></iframe>
+                <div class="test-result info">
+                    <strong>Testing Checklist:</strong>
+                    <ul>
+                        <li>□ App loads without errors</li>
+                        <li>□ Login/Register buttons work</li>
+                        <li>□ Profile setup shows NFL Fullback option</li>
+                        <li>□ Dashboard shows generated workout</li>
+                        <li>□ Adaptive plan is displayed</li>
+                        <li>□ Workout editing works</li>
+                        <li>□ Food logging works</li>
+                    </ul>
+                </div>
+            `;
+        }
+        
+        // Test if the app is accessible
+        fetch('https://scioptimal-fitness-app.netlify.app')
+            .then(response => {
+                if (response.ok) {
+                    document.body.insertAdjacentHTML('afterbegin', 
+                        '<div class="test-result success">✅ App is accessible and loading correctly</div>'
+                    );
+                } else {
+                    document.body.insertAdjacentHTML('afterbegin', 
+                        '<div class="test-result error">❌ App returned status: ' + response.status + '</div>'
+                    );
+                }
+            })
+            .catch(error => {
+                document.body.insertAdjacentHTML('afterbegin', 
+                    '<div class="test-result error">❌ Network error: ' + error.message + '</div>'
+                );
+            });
+    </script>
+</body>
+</html>

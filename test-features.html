@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>SciOptimal Feature Test</title>
+</head>
+<body>
+    <h1>SciOptimal Feature Test</h1>
+    <div id="test-results"></div>
+    
+    <script>
+        // Test the deployed app
+        const testResults = document.getElementById('test-results');
+        
+        async function testFeatures() {
+            const results = [];
+            
+            // Test 1: App loads
+            try {
+                const response = await fetch('https://scioptimal-fitness-app.netlify.app');
+                results.push('✅ App loads: ' + (response.ok ? 'SUCCESS' : 'FAILED'));
+            } catch (error) {
+                results.push('❌ App loads: FAILED - ' + error.message);
+            }
+            
+            // Test 2: JavaScript loads
+            try {
+                const jsResponse = await fetch('https://scioptimal-fitness-app.netlify.app/static/js/main.7fb2d9ad.js');
+                results.push('✅ JavaScript loads: ' + (jsResponse.ok ? 'SUCCESS' : 'FAILED'));
+            } catch (error) {
+                results.push('❌ JavaScript loads: FAILED - ' + error.message);
+            }
+            
+            // Test 3: CSS loads
+            try {
+                const cssResponse = await fetch('https://scioptimal-fitness-app.netlify.app/static/css/main.2be00d04.css');
+                results.push('✅ CSS loads: ' + (cssResponse.ok ? 'SUCCESS' : 'FAILED'));
+            } catch (error) {
+                results.push('❌ CSS loads: FAILED - ' + error.message);
+            }
+            
+            // Display results
+            testResults.innerHTML = results.map(result => `<p>${result}</p>`).join('');
+        }
+        
+        testFeatures();
+    </script>
+</body>
+</html>
