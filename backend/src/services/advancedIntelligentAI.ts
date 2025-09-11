@@ -439,10 +439,10 @@ export class AdvancedIntelligentAI {
   }
 
   private static generateCompletelyDynamicResponse(intent: string, context: ConversationContext, analysis: any): any {
-    // Generate truly dynamic, unique responses
-    const content = this.generateUniqueContent(intent, context, analysis);
-    const suggestions = this.generateUniqueSuggestions(intent, context);
-    const action = this.generateUniqueAction(intent, analysis);
+    // Generate intelligent, contextual responses based on user data and situation
+    const content = this.generateIntelligentContent(intent, context, analysis);
+    const suggestions = this.generateContextualSuggestions(intent, context, analysis);
+    const action = this.determineSmartAction(intent, context, analysis);
     
     return {
       content,
@@ -451,64 +451,165 @@ export class AdvancedIntelligentAI {
     };
   }
 
-  private static generateUniqueContent(intent: string, context: ConversationContext, analysis: any): string {
+  private static generateIntelligentContent(intent: string, context: ConversationContext, analysis: any): string {
     const { sentiment, emotionalState, urgency } = analysis;
     const userProfile = context.userProfile;
+    const recentWorkouts = context.workoutHistory.slice(-3);
+    const recentNutrition = context.nutritionLog.slice(-7);
     
-    // Base content generators
-    const workoutGenerators = [
-      () => `Ready to ${this.getRandomVerb()} your ${this.getRandomIntensity()} workout? ${this.getRandomMotivation()}`,
-      () => `Time to ${this.getRandomAction()} and ${this.getRandomGoal()}! ${this.getRandomEncouragement()}`,
-      () => `Let's ${this.getRandomWorkoutType()} and ${this.getRandomResult()}! ${this.getRandomSupport()}`,
-      () => `Your ${this.getRandomBodyPart()} is ready to ${this.getRandomExercise()}! ${this.getRandomMotivation()}`,
-      () => `Today we ${this.getRandomFocus()} and ${this.getRandomAchievement()}! ${this.getRandomEncouragement()}`
-    ];
+    // Generate intelligent responses based on actual user data and context
+    switch (intent) {
+      case 'workout':
+        return this.generateSmartWorkoutResponse(userProfile, recentWorkouts, context, analysis);
+      case 'nutrition':
+        return this.generateSmartNutritionResponse(userProfile, recentNutrition, context, analysis);
+      case 'progress':
+        return this.generateSmartProgressResponse(userProfile, recentWorkouts, recentNutrition, context, analysis);
+      case 'advice':
+        return this.generateSmartAdviceResponse(userProfile, context, analysis);
+      case 'motivation':
+        return this.generateSmartMotivationResponse(userProfile, recentWorkouts, context, analysis);
+      default:
+        return this.generateSmartGeneralResponse(userProfile, context, analysis);
+    }
+  }
+
+  private static generateSmartWorkoutResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], context: ConversationContext, analysis: any): string {
+    if (!userProfile) {
+      return "I'd love to help you with your workouts! First, let's complete your profile so I can create personalized training plans that match your goals and fitness level.";
+    }
+
+    const lastWorkout = recentWorkouts[recentWorkouts.length - 1];
+    const daysSinceLastWorkout = lastWorkout ? 
+      Math.floor((Date.now() - new Date(lastWorkout.date).getTime()) / (1000 * 60 * 60 * 24)) : 999;
     
-    const nutritionGenerators = [
-      () => `Let's ${this.getRandomNutritionAction()} your ${this.getRandomMealType()} for ${this.getRandomBenefit()}! ${this.getRandomNutritionTip()}`,
-      () => `Time to ${this.getRandomFuel()} your body with ${this.getRandomNutrient()}! ${this.getRandomNutritionAdvice()}`,
-      () => `Your ${this.getRandomMealTime()} needs ${this.getRandomMacro()} to ${this.getRandomNutritionGoal()}! ${this.getRandomNutritionSupport()}`,
-      () => `Let's ${this.getRandomNutritionPlan()} and ${this.getRandomNutritionResult()}! ${this.getRandomNutritionEncouragement()}`,
-      () => `Ready to ${this.getRandomNutritionFocus()} and ${this.getRandomNutritionAchievement()}? ${this.getRandomNutritionMotivation()}`
-    ];
+    const workoutCount = recentWorkouts.length;
+    const avgRPE = recentWorkouts.length > 0 ? 
+      recentWorkouts.reduce((sum, w) => sum + (w.rpe || 5), 0) / recentWorkouts.length : 5;
+
+    // Intelligent analysis based on actual data
+    if (workoutCount === 0) {
+      return `Welcome to your fitness journey! As someone targeting a ${userProfile.targetPhysique} physique, I'll create a comprehensive training plan that builds strength, power, and athleticism. Your current stats (${userProfile.weight}lbs, ${userProfile.height}cm) suggest we should focus on compound movements and progressive overload. Ready to start?`;
+    } else if (daysSinceLastWorkout === 0) {
+      const lastRPE = lastWorkout?.rpe || 5;
+      if (lastRPE >= 8) {
+        return `Excellent work today! That was a high-intensity session (RPE ${lastRPE}). For your ${userProfile.targetPhysique} goals, I recommend focusing on recovery - proper nutrition, hydration, and sleep. Tomorrow we can do active recovery or a lighter session. How are you feeling?`;
+      } else {
+        return `Good session today! Since your RPE was ${lastRPE}, you have room to push harder next time. For your ${userProfile.targetPhysique} transformation, we need to progressively overload. What muscle groups felt strongest today?`;
+      }
+    } else if (daysSinceLastWorkout === 1) {
+      return `Perfect timing for your next workout! Your consistency is key for ${userProfile.targetPhysique} development. Based on your last session, I suggest focusing on upper body to balance your training. Ready to train?`;
+    } else if (daysSinceLastWorkout <= 3) {
+      return `It's been ${daysSinceLastWorkout} days since your last workout. No worries - life happens! For your ${userProfile.targetPhysique} goals, let's get back on track with a session that matches your current energy level. What's your preference: upper body, lower body, or full body?`;
+    } else {
+      return `Welcome back! It's been ${daysSinceLastWorkout} days since your last workout. For your ${userProfile.targetPhysique} goals, we need to restart gradually to avoid injury. I recommend starting with a moderate-intensity full-body session to re-engage your muscles. Sound good?`;
+    }
+  }
+
+  private static generateSmartNutritionResponse(userProfile: UserProfile | null, recentNutrition: NutritionEntry[], context: ConversationContext, analysis: any): string {
+    if (!userProfile) {
+      return "I'd love to help optimize your nutrition! Please complete your profile first so I can calculate your precise macro targets based on your goals, body composition, and activity level.";
+    }
+
+    const todayNutrition = recentNutrition.filter(n => 
+      new Date(n.date).toDateString() === new Date().toDateString()
+    );
     
-    const progressGenerators = [
-      () => `Your ${this.getRandomProgressAspect()} is ${this.getRandomProgressState()}! ${this.getRandomProgressInsight()}`,
-      () => `Time to ${this.getRandomProgressAction()} and ${this.getRandomProgressResult()}! ${this.getRandomProgressEncouragement()}`,
-      () => `You've ${this.getRandomProgressAchievement()} in your ${this.getRandomProgressArea()}! ${this.getRandomProgressCelebration()}`,
-      () => `Let's ${this.getRandomProgressFocus()} and ${this.getRandomProgressGoal()}! ${this.getRandomProgressSupport()}`,
-      () => `Your ${this.getRandomProgressMetric()} shows ${this.getRandomProgressTrend()}! ${this.getRandomProgressAdvice()}`
-    ];
+    if (todayNutrition.length === 0) {
+      return `Let's fuel your ${userProfile.targetPhysique} goals! Based on your stats (${userProfile.weight}lbs, ${userProfile.height}cm, ${userProfile.activityLevel}), you need approximately 2,800-3,200 calories daily. For muscle building, aim for 1.6-2.2g protein per kg body weight. What would you like to log first?`;
+    } else {
+      const totalCalories = todayNutrition.reduce((sum, n) => sum + n.calories, 0);
+      const totalProtein = todayNutrition.reduce((sum, n) => sum + n.protein, 0);
+      const totalCarbs = todayNutrition.reduce((sum, n) => sum + n.carbs, 0);
+      const totalFat = todayNutrition.reduce((sum, n) => sum + n.fat, 0);
+      
+      const proteinTarget = userProfile.weight * 2.2; // 2.2g per kg
+      const proteinProgress = (totalProtein / proteinTarget * 100).toFixed(1);
+      
+      if (totalProtein < proteinTarget * 0.8) {
+        return `Your nutrition tracking is great! You're at ${totalCalories} calories with ${totalProtein.toFixed(1)}g protein (${proteinProgress}% of target). For your ${userProfile.targetPhysique} goals, you need more protein - try adding lean meat, Greek yogurt, or a protein shake. What's your next meal?`;
+      } else if (totalCalories < 2500) {
+        return `Good macro balance! ${totalCalories} calories with ${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, ${totalFat.toFixed(1)}g fat. For your ${userProfile.targetPhysique} goals, you might need more calories overall. Consider adding healthy fats like nuts or avocado. What's next?`;
+      } else {
+        return `Excellent nutrition today! ${totalCalories} calories with solid macros (${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, ${totalFat.toFixed(1)}g fat). This is perfect for your ${userProfile.targetPhysique} goals. Keep this up! What else can I help with?`;
+      }
+    }
+  }
+
+  private static generateSmartProgressResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], recentNutrition: NutritionEntry[], context: ConversationContext, analysis: any): string {
+    if (!userProfile) {
+      return "I'd love to analyze your progress! Please complete your profile first so I can track your journey toward your fitness goals.";
+    }
+
+    const workoutCount = recentWorkouts.length;
+    const nutritionCount = recentNutrition.length;
+    const avgRPE = recentWorkouts.length > 0 ? 
+      recentWorkouts.reduce((sum, w) => sum + (w.rpe || 5), 0) / recentWorkouts.length : 0;
     
-    const adviceGenerators = [
-      () => `Here's a ${this.getRandomAdviceType()} tip: ${this.getRandomAdviceContent()}! ${this.getRandomAdviceEncouragement()}`,
-      () => `For ${this.getRandomAdviceSituation()}, try ${this.getRandomAdviceSolution()}! ${this.getRandomAdviceSupport()}`,
-      () => `The key to ${this.getRandomAdviceGoal()} is ${this.getRandomAdviceKey()}! ${this.getRandomAdviceMotivation()}`,
-      () => `When ${this.getRandomAdviceContext()}, remember ${this.getRandomAdviceReminder()}! ${this.getRandomAdviceEncouragement()}`,
-      () => `To ${this.getRandomAdviceObjective()}, focus on ${this.getRandomAdviceFocus()}! ${this.getRandomAdviceSupport()}`
-    ];
+    if (workoutCount === 0 && nutritionCount === 0) {
+      return `Let's start tracking your ${userProfile.targetPhysique} journey! I'll help you monitor your workouts, nutrition, and progress. Every data point helps me give you better advice. Ready to begin?`;
+    } else if (workoutCount > 0 && nutritionCount > 0) {
+      const consistency = Math.min(workoutCount / 7, 1) * 100;
+      return `Great progress tracking! You've logged ${workoutCount} workouts and ${nutritionCount} nutrition entries. Your consistency is ${consistency.toFixed(0)}%. For your ${userProfile.targetPhysique} goals, this data shows you're ${avgRPE > 7 ? 'pushing hard' : 'building steadily'}. Keep it up!`;
+    } else if (workoutCount > 0) {
+      return `Good workout tracking! You've logged ${workoutCount} sessions with an average RPE of ${avgRPE.toFixed(1)}. For your ${userProfile.targetPhysique} goals, I'd also recommend tracking your nutrition to see the full picture. Want to start logging meals?`;
+    } else {
+      return `Nice nutrition tracking! You've logged ${nutritionCount} entries. For your ${userProfile.targetPhysique} goals, I'd also recommend tracking your workouts to monitor strength gains and performance. Ready to log some training sessions?`;
+    }
+  }
+
+  private static generateSmartAdviceResponse(userProfile: UserProfile | null, context: ConversationContext, analysis: any): string {
+    if (!userProfile) {
+      return "I'd love to give you personalized advice! Please complete your profile first so I can provide guidance tailored to your specific goals and situation.";
+    }
+
+    const recentWorkouts = context.workoutHistory.slice(-7);
+    const recentNutrition = context.nutritionLog.slice(-7);
+    const workoutCount = recentWorkouts.length;
+    const nutritionCount = recentNutrition.length;
     
-    const motivationGenerators = [
-      () => `You're ${this.getRandomMotivationState()} and ${this.getRandomMotivationAction()}! ${this.getRandomMotivationEncouragement()}`,
-      () => `Every ${this.getRandomMotivationMoment()} brings you closer to ${this.getRandomMotivationGoal()}! ${this.getRandomMotivationSupport()}`,
-      () => `Your ${this.getRandomMotivationQuality()} is ${this.getRandomMotivationResult()}! ${this.getRandomMotivationCelebration()}`,
-      () => `Keep ${this.getRandomMotivationAction()} because ${this.getRandomMotivationReason()}! ${this.getRandomMotivationEncouragement()}`,
-      () => `You've got the ${this.getRandomMotivationStrength()} to ${this.getRandomMotivationAchievement()}! ${this.getRandomMotivationSupport()}`
-    ];
+    // Provide specific advice based on user's actual data
+    if (workoutCount === 0) {
+      return `For your ${userProfile.targetPhysique} goals, start with 3-4 workouts per week focusing on compound movements. Since you're ${userProfile.activityLevel.toLowerCase()}, begin with moderate intensity and gradually increase. Key exercises: squats, deadlifts, bench press, rows, and overhead press. Form over weight always!`;
+    } else if (nutritionCount === 0) {
+      return `Your workout consistency is great! For your ${userProfile.targetPhysique} goals, nutrition is equally important. Aim for 1.6-2.2g protein per kg body weight (${(userProfile.weight * 0.45 * 2.2).toFixed(0)}g daily). Time your carbs around workouts and include healthy fats. Want help planning meals?`;
+    } else if (workoutCount < 3) {
+      return `You're tracking well! For your ${userProfile.targetPhysique} goals, increase workout frequency to 3-4x weekly. Focus on progressive overload - add weight, reps, or sets each week. Your current routine needs more volume. What's your main training focus?`;
+    } else {
+      return `Excellent consistency! You're on track for your ${userProfile.targetPhysique} goals. Key advice: 1) Progressive overload weekly, 2) 7-9 hours sleep for recovery, 3) Stay hydrated (3-4L daily), 4) Track your progress monthly. What specific area needs improvement?`;
+    }
+  }
+
+  private static generateSmartMotivationResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], context: ConversationContext, analysis: any): string {
+    if (!userProfile) {
+      return "You've got this! Every fitness journey starts with a single step. I'm here to support you every step of the way toward your goals.";
+    }
+
+    const workoutCount = recentWorkouts.length;
+    const lastWorkout = recentWorkouts[recentWorkouts.length - 1];
+    const daysSinceLastWorkout = lastWorkout ? 
+      Math.floor((Date.now() - new Date(lastWorkout.date).getTime()) / (1000 * 60 * 60 * 24)) : 999;
     
-    // Select generator based on intent
-    const generators = {
-      workout: workoutGenerators,
-      nutrition: nutritionGenerators,
-      progress: progressGenerators,
-      advice: adviceGenerators,
-      motivation: motivationGenerators
-    };
-    
-    const generatorList = generators[intent as keyof typeof generators] || adviceGenerators;
-    const selectedGenerator = generatorList[Math.floor(Math.random() * generatorList.length)];
-    
-    return selectedGenerator();
+    // Provide motivation based on actual progress
+    if (workoutCount === 0) {
+      return `Your ${userProfile.targetPhysique} transformation starts today! You have the power to change your body and life. Every champion was once a beginner who refused to give up. Let's make it happen!`;
+    } else if (workoutCount < 5) {
+      return `You're building momentum! Those ${workoutCount} workouts are the foundation of your ${userProfile.targetPhysique} success. Consistency beats perfection - keep showing up and the results will follow. You're stronger than you think!`;
+    } else if (daysSinceLastWorkout === 0) {
+      return `Amazing work today! Your dedication to becoming a ${userProfile.targetPhysique} is inspiring. Every rep, every set, every drop of sweat is bringing you closer to your goals. You're crushing it!`;
+    } else if (daysSinceLastWorkout <= 2) {
+      return `You're on fire! ${workoutCount} workouts logged and counting. Your ${userProfile.targetPhysique} goals are within reach because you're putting in the work. Keep this energy going - you're unstoppable!`;
+    } else {
+      return `You've got this! Your ${workoutCount} workouts prove you're committed to your ${userProfile.targetPhysique} goals. Every champion faces setbacks - what matters is getting back up. You're stronger than any obstacle. Let's go!`;
+    }
+  }
+
+  private static generateSmartGeneralResponse(userProfile: UserProfile | null, context: ConversationContext, analysis: any): string {
+    if (!userProfile) {
+      return "I'm here to help you achieve your fitness goals! Whether it's workouts, nutrition, progress tracking, or motivation, I've got your back. What would you like to work on today?";
+    }
+
+    return `I'm excited to help you reach your ${userProfile.targetPhysique} goals! With your ${userProfile.activityLevel.toLowerCase()} lifestyle and current stats, we can create a plan that works for you. What's on your mind today?`;
   }
 
   // Random word generators for truly unique content
@@ -866,7 +967,7 @@ export class AdvancedIntelligentAI {
     return achievements[Math.floor(Math.random() * achievements.length)];
   }
 
-  private static generateUniqueSuggestions(intent: string, context: ConversationContext): string[] {
+  private static generateContextualSuggestions(intent: string, context: ConversationContext, analysis: any): string[] {
     const suggestionGenerators = {
       workout: () => [
         `Generate new ${this.getRandomWorkoutType()}`,
@@ -904,7 +1005,7 @@ export class AdvancedIntelligentAI {
     return generator();
   }
 
-  private static generateUniqueAction(intent: string, analysis: any): string {
+  private static determineSmartAction(intent: string, context: ConversationContext, analysis: any): string {
     const actionGenerators = {
       workout: () => `${this.getRandomAction()}_${this.getRandomWorkoutType()}`,
       nutrition: () => `${this.getRandomNutritionAction()}_${this.getRandomMealType()}`,
