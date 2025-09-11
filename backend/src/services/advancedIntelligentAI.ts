@@ -416,8 +416,8 @@ export class AdvancedIntelligentAI {
   private static generateDynamicResponse(analysis: any, context: ConversationContext): AIResponse {
     const { intent, sentiment, entities, patterns, confidence, urgency, complexity, emotionalState } = analysis;
     
-    // Generate base response with variations
-    let response = this.getVariedResponse(intent, context, analysis);
+    // Generate completely dynamic response
+    let response = this.generateCompletelyDynamicResponse(intent, context, analysis);
     
     // Add dynamic personalization
     response = this.addDynamicPersonalization(response, patterns, context, sentiment, emotionalState);
@@ -436,6 +436,77 @@ export class AdvancedIntelligentAI {
       personalized: this.isPersonalized(patterns, context),
       action: this.determineAction(intent, analysis)
     };
+  }
+
+  private static generateCompletelyDynamicResponse(intent: string, context: ConversationContext, analysis: any): any {
+    // Initialize response variations if not exists
+    this.initializeResponseVariations();
+    
+    const variations = this.responseVariations.get(intent) || [];
+    
+    // Generate completely random response
+    if (variations.length > 0) {
+      const randomVariation = variations[Math.floor(Math.random() * variations.length)];
+      return {
+        content: randomVariation,
+        suggestions: this.getRandomSuggestions(intent),
+        action: this.getRandomAction(intent)
+      };
+    }
+    
+    // Fallback to base response if no variations
+    return this.getBaseResponse(intent, context);
+  }
+
+  private static getRandomSuggestions(intent: string): string[] {
+    const suggestionSets = {
+      workout: [
+        ["Generate new workout", "Modify current workout", "Show workout tips", "Track my progress"],
+        ["Create workout plan", "Get exercise advice", "Check my form", "Plan recovery"],
+        ["Build strength", "Improve endurance", "Focus on technique", "Set new goals"],
+        ["Start training", "Optimize routine", "Track performance", "Get motivated"]
+      ],
+      nutrition: [
+        ["Create meal plan", "Track my food", "Calculate macros", "Get nutrition advice"],
+        ["Plan meals", "Log nutrition", "Check macros", "Get diet tips"],
+        ["Fuel my body", "Optimize diet", "Track calories", "Get healthy recipes"],
+        ["Eat better", "Plan nutrition", "Track intake", "Get guidance"]
+      ],
+      progress: [
+        ["View my progress", "Set new goals", "Track improvements", "Get insights"],
+        ["Check results", "Plan next steps", "Analyze data", "Celebrate wins"],
+        ["See growth", "Set targets", "Review performance", "Stay motivated"],
+        ["Track success", "Plan ahead", "Measure gains", "Keep going"]
+      ],
+      advice: [
+        ["Get expert tips", "Learn best practices", "Improve technique", "Stay consistent"],
+        ["Ask questions", "Get guidance", "Learn more", "Improve skills"],
+        ["Seek help", "Get support", "Learn techniques", "Stay focused"],
+        ["Get wisdom", "Learn secrets", "Improve approach", "Stay dedicated"]
+      ],
+      motivation: [
+        ["Stay motivated", "Get inspired", "Push harder", "Believe in yourself"],
+        ["Keep going", "Stay strong", "Push limits", "Never give up"],
+        ["Stay focused", "Keep pushing", "Stay dedicated", "Stay positive"],
+        ["Stay committed", "Keep fighting", "Stay determined", "Stay resilient"]
+      ]
+    };
+    
+    const sets = suggestionSets[intent as keyof typeof suggestionSets] || suggestionSets.advice;
+    return sets[Math.floor(Math.random() * sets.length)];
+  }
+
+  private static getRandomAction(intent: string): string {
+    const actions = {
+      workout: ['workout_help', 'generate_workout', 'modify_workout', 'workout_tips'],
+      nutrition: ['nutrition_help', 'create_meal_plan', 'track_food', 'nutrition_advice'],
+      progress: ['analyze_progress', 'view_progress', 'set_goals', 'track_improvements'],
+      advice: ['provide_advice', 'give_tips', 'share_wisdom', 'offer_guidance'],
+      motivation: ['motivate', 'inspire', 'encourage', 'support']
+    };
+    
+    const actionList = actions[intent as keyof typeof actions] || actions.advice;
+    return actionList[Math.floor(Math.random() * actionList.length)];
   }
 
   private static getVariedResponse(intent: string, context: ConversationContext, analysis: any): any {
