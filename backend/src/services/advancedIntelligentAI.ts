@@ -439,23 +439,482 @@ export class AdvancedIntelligentAI {
   }
 
   private static generateCompletelyDynamicResponse(intent: string, context: ConversationContext, analysis: any): any {
-    // Initialize response variations if not exists
-    this.initializeResponseVariations();
+    // Generate truly dynamic, unique responses
+    const content = this.generateUniqueContent(intent, context, analysis);
+    const suggestions = this.generateUniqueSuggestions(intent, context);
+    const action = this.generateUniqueAction(intent, analysis);
     
-    const variations = this.responseVariations.get(intent) || [];
+    return {
+      content,
+      suggestions,
+      action
+    };
+  }
+
+  private static generateUniqueContent(intent: string, context: ConversationContext, analysis: any): string {
+    const { sentiment, emotionalState, urgency } = analysis;
+    const userProfile = context.userProfile;
     
-    // Generate completely random response
-    if (variations.length > 0) {
-      const randomVariation = variations[Math.floor(Math.random() * variations.length)];
-      return {
-        content: randomVariation,
-        suggestions: this.getRandomSuggestions(intent),
-        action: this.getRandomAction(intent)
-      };
-    }
+    // Base content generators
+    const workoutGenerators = [
+      () => `Ready to ${this.getRandomVerb()} your ${this.getRandomIntensity()} workout? ${this.getRandomMotivation()}`,
+      () => `Time to ${this.getRandomAction()} and ${this.getRandomGoal()}! ${this.getRandomEncouragement()}`,
+      () => `Let's ${this.getRandomWorkoutType()} and ${this.getRandomResult()}! ${this.getRandomSupport()}`,
+      () => `Your ${this.getRandomBodyPart()} is ready to ${this.getRandomExercise()}! ${this.getRandomMotivation()}`,
+      () => `Today we ${this.getRandomFocus()} and ${this.getRandomAchievement()}! ${this.getRandomEncouragement()}`
+    ];
     
-    // Fallback to base response if no variations
-    return this.getBaseResponse(intent, context);
+    const nutritionGenerators = [
+      () => `Let's ${this.getRandomNutritionAction()} your ${this.getRandomMealType()} for ${this.getRandomBenefit()}! ${this.getRandomNutritionTip()}`,
+      () => `Time to ${this.getRandomFuel()} your body with ${this.getRandomNutrient()}! ${this.getRandomNutritionAdvice()}`,
+      () => `Your ${this.getRandomMealTime()} needs ${this.getRandomMacro()} to ${this.getRandomNutritionGoal()}! ${this.getRandomNutritionSupport()}`,
+      () => `Let's ${this.getRandomNutritionPlan()} and ${this.getRandomNutritionResult()}! ${this.getRandomNutritionEncouragement()}`,
+      () => `Ready to ${this.getRandomNutritionFocus()} and ${this.getRandomNutritionAchievement()}? ${this.getRandomNutritionMotivation()}`
+    ];
+    
+    const progressGenerators = [
+      () => `Your ${this.getRandomProgressAspect()} is ${this.getRandomProgressState()}! ${this.getRandomProgressInsight()}`,
+      () => `Time to ${this.getRandomProgressAction()} and ${this.getRandomProgressResult()}! ${this.getRandomProgressEncouragement()}`,
+      () => `You've ${this.getRandomProgressAchievement()} in your ${this.getRandomProgressArea()}! ${this.getRandomProgressCelebration()}`,
+      () => `Let's ${this.getRandomProgressFocus()} and ${this.getRandomProgressGoal()}! ${this.getRandomProgressSupport()}`,
+      () => `Your ${this.getRandomProgressMetric()} shows ${this.getRandomProgressTrend()}! ${this.getRandomProgressAdvice()}`
+    ];
+    
+    const adviceGenerators = [
+      () => `Here's a ${this.getRandomAdviceType()} tip: ${this.getRandomAdviceContent()}! ${this.getRandomAdviceEncouragement()}`,
+      () => `For ${this.getRandomAdviceSituation()}, try ${this.getRandomAdviceSolution()}! ${this.getRandomAdviceSupport()}`,
+      () => `The key to ${this.getRandomAdviceGoal()} is ${this.getRandomAdviceKey()}! ${this.getRandomAdviceMotivation()}`,
+      () => `When ${this.getRandomAdviceContext()}, remember ${this.getRandomAdviceReminder()}! ${this.getRandomAdviceEncouragement()}`,
+      () => `To ${this.getRandomAdviceObjective()}, focus on ${this.getRandomAdviceFocus()}! ${this.getRandomAdviceSupport()}`
+    ];
+    
+    const motivationGenerators = [
+      () => `You're ${this.getRandomMotivationState()} and ${this.getRandomMotivationAction()}! ${this.getRandomMotivationEncouragement()}`,
+      () => `Every ${this.getRandomMotivationMoment()} brings you closer to ${this.getRandomMotivationGoal()}! ${this.getRandomMotivationSupport()}`,
+      () => `Your ${this.getRandomMotivationQuality()} is ${this.getRandomMotivationResult()}! ${this.getRandomMotivationCelebration()}`,
+      () => `Keep ${this.getRandomMotivationAction()} because ${this.getRandomMotivationReason()}! ${this.getRandomMotivationEncouragement()}`,
+      () => `You've got the ${this.getRandomMotivationStrength()} to ${this.getRandomMotivationAchievement()}! ${this.getRandomMotivationSupport()}`
+    ];
+    
+    // Select generator based on intent
+    const generators = {
+      workout: workoutGenerators,
+      nutrition: nutritionGenerators,
+      progress: progressGenerators,
+      advice: adviceGenerators,
+      motivation: motivationGenerators
+    };
+    
+    const generatorList = generators[intent as keyof typeof generators] || adviceGenerators;
+    const selectedGenerator = generatorList[Math.floor(Math.random() * generatorList.length)];
+    
+    return selectedGenerator();
+  }
+
+  // Random word generators for truly unique content
+  private static getRandomVerb(): string {
+    const verbs = ['crush', 'dominate', 'conquer', 'master', 'excel', 'achieve', 'push', 'drive', 'power', 'fuel'];
+    return verbs[Math.floor(Math.random() * verbs.length)];
+  }
+
+  private static getRandomIntensity(): string {
+    const intensities = ['intense', 'powerful', 'explosive', 'dynamic', 'brutal', 'savage', 'epic', 'legendary', 'insane', 'unleashed'];
+    return intensities[Math.floor(Math.random() * intensities.length)];
+  }
+
+  private static getRandomMotivation(): string {
+    const motivations = ['You\'ve got this!', 'Let\'s go!', 'Time to shine!', 'You\'re unstoppable!', 'Make it happen!', 'Push harder!', 'Stay strong!', 'Keep going!', 'You\'re amazing!', 'Believe in yourself!'];
+    return motivations[Math.floor(Math.random() * motivations.length)];
+  }
+
+  private static getRandomAction(): string {
+    const actions = ['push', 'pull', 'squat', 'press', 'lift', 'run', 'jump', 'explode', 'power', 'thrive'];
+    return actions[Math.floor(Math.random() * actions.length)];
+  }
+
+  private static getRandomGoal(): string {
+    const goals = ['build strength', 'gain power', 'increase endurance', 'improve form', 'boost performance', 'enhance mobility', 'develop speed', 'create muscle', 'achieve greatness', 'reach new heights'];
+    return goals[Math.floor(Math.random() * goals.length)];
+  }
+
+  private static getRandomEncouragement(): string {
+    const encouragements = ['You\'re doing incredible!', 'Keep pushing forward!', 'You\'re stronger than you think!', 'Every rep counts!', 'You\'re making progress!', 'Stay focused!', 'You\'re crushing it!', 'Don\'t give up!', 'You\'re on fire!', 'Keep the momentum!'];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+
+  private static getRandomWorkoutType(): string {
+    const types = ['train hard', 'work out', 'exercise', 'sweat it out', 'get after it', 'push limits', 'build muscle', 'burn calories', 'get stronger', 'transform'];
+    return types[Math.floor(Math.random() * types.length)];
+  }
+
+  private static getRandomResult(): string {
+    const results = ['see results', 'make gains', 'get stronger', 'build muscle', 'burn fat', 'improve fitness', 'boost energy', 'enhance performance', 'achieve goals', 'transform your body'];
+    return results[Math.floor(Math.random() * results.length)];
+  }
+
+  private static getRandomSupport(): string {
+    const supports = ['I\'m here for you!', 'You\'ve got my support!', 'Let\'s do this together!', 'I believe in you!', 'You\'re not alone!', 'We\'re in this together!', 'You\'re doing great!', 'Keep it up!', 'You\'re amazing!', 'Stay strong!'];
+    return supports[Math.floor(Math.random() * supports.length)];
+  }
+
+  private static getRandomBodyPart(): string {
+    const bodyParts = ['core', 'back', 'chest', 'legs', 'arms', 'shoulders', 'glutes', 'abs', 'muscles', 'strength'];
+    return bodyParts[Math.floor(Math.random() * bodyParts.length)];
+  }
+
+  private static getRandomExercise(): string {
+    const exercises = ['work', 'perform', 'excel', 'dominate', 'push', 'pull', 'squat', 'press', 'lift', 'thrive'];
+    return exercises[Math.floor(Math.random() * exercises.length)];
+  }
+
+  private static getRandomFocus(): string {
+    const focuses = ['focus on form', 'push the limits', 'build strength', 'improve technique', 'increase intensity', 'enhance performance', 'boost power', 'develop speed', 'create muscle', 'achieve greatness'];
+    return focuses[Math.floor(Math.random() * focuses.length)];
+  }
+
+  private static getRandomAchievement(): string {
+    const achievements = ['see amazing results', 'make incredible gains', 'get stronger than ever', 'build serious muscle', 'burn tons of fat', 'improve dramatically', 'boost your energy', 'enhance your performance', 'achieve your goals', 'transform completely'];
+    return achievements[Math.floor(Math.random() * achievements.length)];
+  }
+
+  // Nutrition generators
+  private static getRandomNutritionAction(): string {
+    const actions = ['fuel', 'nourish', 'optimize', 'enhance', 'boost', 'power', 'strengthen', 'support', 'improve', 'maximize'];
+    return actions[Math.floor(Math.random() * actions.length)];
+  }
+
+  private static getRandomMealType(): string {
+    const meals = ['breakfast', 'lunch', 'dinner', 'snack', 'pre-workout', 'post-workout', 'recovery meal', 'fuel meal', 'power meal', 'nutrition meal'];
+    return meals[Math.floor(Math.random() * meals.length)];
+  }
+
+  private static getRandomBenefit(): string {
+    const benefits = ['maximum energy', 'optimal recovery', 'muscle growth', 'fat burning', 'performance boost', 'strength gains', 'endurance improvement', 'health optimization', 'body transformation', 'peak performance'];
+    return benefits[Math.floor(Math.random() * benefits.length)];
+  }
+
+  private static getRandomNutritionTip(): string {
+    const tips = ['Remember to stay hydrated!', 'Protein is your friend!', 'Carbs fuel your workouts!', 'Healthy fats are essential!', 'Timing matters!', 'Quality over quantity!', 'Listen to your body!', 'Consistency is key!', 'You\'re doing great!', 'Keep it up!'];
+    return tips[Math.floor(Math.random() * tips.length)];
+  }
+
+  private static getRandomFuel(): string {
+    const fuels = ['fuel', 'power', 'energize', 'nourish', 'strengthen', 'boost', 'enhance', 'optimize', 'support', 'maximize'];
+    return fuels[Math.floor(Math.random() * fuels.length)];
+  }
+
+  private static getRandomNutrient(): string {
+    const nutrients = ['protein', 'carbs', 'healthy fats', 'vitamins', 'minerals', 'antioxidants', 'fiber', 'omega-3s', 'electrolytes', 'micronutrients'];
+    return nutrients[Math.floor(Math.random() * nutrients.length)];
+  }
+
+  private static getRandomNutritionAdvice(): string {
+    const advice = ['Your body will thank you!', 'This will fuel your gains!', 'Perfect for your goals!', 'Your muscles need this!', 'This is exactly what you need!', 'Your performance will improve!', 'This will help you recover!', 'Your energy will soar!', 'This is the right choice!', 'You\'re making great decisions!'];
+    return advice[Math.floor(Math.random() * advice.length)];
+  }
+
+  private static getRandomMealTime(): string {
+    const times = ['morning', 'afternoon', 'evening', 'pre-workout', 'post-workout', 'bedtime', 'midday', 'late night', 'early morning', 'lunch time'];
+    return times[Math.floor(Math.random() * times.length)];
+  }
+
+  private static getRandomMacro(): string {
+    const macros = ['protein', 'carbs', 'healthy fats', 'fiber', 'vitamins', 'minerals', 'antioxidants', 'omega-3s', 'electrolytes', 'micronutrients'];
+    return macros[Math.floor(Math.random() * macros.length)];
+  }
+
+  private static getRandomNutritionGoal(): string {
+    const goals = ['build muscle', 'burn fat', 'boost energy', 'improve recovery', 'enhance performance', 'strengthen immunity', 'optimize health', 'maximize gains', 'support training', 'fuel workouts'];
+    return goals[Math.floor(Math.random() * goals.length)];
+  }
+
+  private static getRandomNutritionSupport(): string {
+    const supports = ['Your body needs this!', 'This will help you succeed!', 'Perfect for your goals!', 'Your muscles will love this!', 'This is exactly what you need!', 'Your performance will improve!', 'This will fuel your workouts!', 'Your recovery will be faster!', 'This is the right choice!', 'You\'re making smart decisions!'];
+    return supports[Math.floor(Math.random() * supports.length)];
+  }
+
+  private static getRandomNutritionPlan(): string {
+    const plans = ['plan your meals', 'optimize your nutrition', 'fuel your body', 'nourish your muscles', 'boost your energy', 'enhance your performance', 'support your training', 'maximize your gains', 'improve your health', 'transform your body'];
+    return plans[Math.floor(Math.random() * plans.length)];
+  }
+
+  private static getRandomNutritionResult(): string {
+    const results = ['see amazing results', 'make incredible gains', 'get stronger than ever', 'build serious muscle', 'burn tons of fat', 'improve dramatically', 'boost your energy', 'enhance your performance', 'achieve your goals', 'transform completely'];
+    return results[Math.floor(Math.random() * results.length)];
+  }
+
+  private static getRandomNutritionEncouragement(): string {
+    const encouragements = ['You\'re doing incredible!', 'Keep making great choices!', 'Your body will thank you!', 'You\'re fueling your success!', 'Every meal counts!', 'Stay consistent!', 'You\'re crushing it!', 'Don\'t give up!', 'You\'re on fire!', 'Keep the momentum!'];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+
+  private static getRandomNutritionFocus(): string {
+    const focuses = ['focus on quality', 'prioritize protein', 'balance your macros', 'time your meals', 'hydrate properly', 'choose whole foods', 'plan ahead', 'listen to your body', 'stay consistent', 'enjoy the process'];
+    return focuses[Math.floor(Math.random() * focuses.length)];
+  }
+
+  private static getRandomNutritionAchievement(): string {
+    const achievements = ['see amazing results', 'make incredible gains', 'get stronger than ever', 'build serious muscle', 'burn tons of fat', 'improve dramatically', 'boost your energy', 'enhance your performance', 'achieve your goals', 'transform completely'];
+    return achievements[Math.floor(Math.random() * achievements.length)];
+  }
+
+  private static getRandomNutritionMotivation(): string {
+    const motivations = ['You\'ve got this!', 'Let\'s go!', 'Time to shine!', 'You\'re unstoppable!', 'Make it happen!', 'Push harder!', 'Stay strong!', 'Keep going!', 'You\'re amazing!', 'Believe in yourself!'];
+    return motivations[Math.floor(Math.random() * motivations.length)];
+  }
+
+  // Progress generators
+  private static getRandomProgressAspect(): string {
+    const aspects = ['strength', 'endurance', 'muscle mass', 'body fat', 'performance', 'energy', 'mobility', 'flexibility', 'power', 'speed'];
+    return aspects[Math.floor(Math.random() * aspects.length)];
+  }
+
+  private static getRandomProgressState(): string {
+    const states = ['improving', 'getting stronger', 'making gains', 'burning fat', 'building muscle', 'enhancing performance', 'boosting energy', 'increasing power', 'developing speed', 'transforming'];
+    return states[Math.floor(Math.random() * states.length)];
+  }
+
+  private static getRandomProgressInsight(): string {
+    const insights = ['This is amazing progress!', 'You\'re on the right track!', 'Keep up the great work!', 'Your dedication is paying off!', 'You\'re making incredible gains!', 'This is exactly what we want to see!', 'Your hard work is showing!', 'You\'re crushing your goals!', 'This is fantastic!', 'You\'re doing incredible!'];
+    return insights[Math.floor(Math.random() * insights.length)];
+  }
+
+  private static getRandomProgressAction(): string {
+    const actions = ['analyze your progress', 'track your improvements', 'celebrate your wins', 'set new goals', 'push harder', 'stay consistent', 'maintain momentum', 'build on success', 'keep improving', 'reach higher'];
+    return actions[Math.floor(Math.random() * actions.length)];
+  }
+
+  private static getRandomProgressResult(): string {
+    const results = ['see even better results', 'make bigger gains', 'get stronger than ever', 'build more muscle', 'burn more fat', 'improve dramatically', 'boost your performance', 'enhance your energy', 'achieve your goals', 'transform completely'];
+    return results[Math.floor(Math.random() * results.length)];
+  }
+
+  private static getRandomProgressEncouragement(): string {
+    const encouragements = ['You\'re doing incredible!', 'Keep pushing forward!', 'You\'re stronger than you think!', 'Every day counts!', 'You\'re making progress!', 'Stay focused!', 'You\'re crushing it!', 'Don\'t give up!', 'You\'re on fire!', 'Keep the momentum!'];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+
+  private static getRandomProgressAchievement(): string {
+    const achievements = ['made amazing progress', 'achieved incredible gains', 'gotten stronger than ever', 'built serious muscle', 'burned tons of fat', 'improved dramatically', 'boosted your performance', 'enhanced your energy', 'reached your goals', 'transformed completely'];
+    return achievements[Math.floor(Math.random() * achievements.length)];
+  }
+
+  private static getRandomProgressArea(): string {
+    const areas = ['strength training', 'cardio workouts', 'muscle building', 'fat burning', 'performance improvement', 'energy enhancement', 'mobility work', 'flexibility training', 'power development', 'speed training'];
+    return areas[Math.floor(Math.random() * areas.length)];
+  }
+
+  private static getRandomProgressCelebration(): string {
+    const celebrations = ['This is amazing!', 'You\'re crushing it!', 'Keep up the great work!', 'Your dedication is paying off!', 'You\'re making incredible gains!', 'This is exactly what we want to see!', 'Your hard work is showing!', 'You\'re on fire!', 'This is fantastic!', 'You\'re doing incredible!'];
+    return celebrations[Math.floor(Math.random() * celebrations.length)];
+  }
+
+  private static getRandomProgressFocus(): string {
+    const focuses = ['focus on consistency', 'prioritize recovery', 'maintain momentum', 'build on success', 'push your limits', 'stay dedicated', 'keep improving', 'reach higher', 'achieve more', 'transform further'];
+    return focuses[Math.floor(Math.random() * focuses.length)];
+  }
+
+  private static getRandomProgressGoal(): string {
+    const goals = ['see even better results', 'make bigger gains', 'get stronger than ever', 'build more muscle', 'burn more fat', 'improve dramatically', 'boost your performance', 'enhance your energy', 'achieve your goals', 'transform completely'];
+    return goals[Math.floor(Math.random() * goals.length)];
+  }
+
+  private static getRandomProgressSupport(): string {
+    const supports = ['I\'m here for you!', 'You\'ve got my support!', 'Let\'s do this together!', 'I believe in you!', 'You\'re not alone!', 'We\'re in this together!', 'You\'re doing great!', 'Keep it up!', 'You\'re amazing!', 'Stay strong!'];
+    return supports[Math.floor(Math.random() * supports.length)];
+  }
+
+  private static getRandomProgressMetric(): string {
+    const metrics = ['strength gains', 'muscle growth', 'fat loss', 'performance improvement', 'energy levels', 'endurance capacity', 'power output', 'speed development', 'mobility gains', 'flexibility improvement'];
+    return metrics[Math.floor(Math.random() * metrics.length)];
+  }
+
+  private static getRandomProgressTrend(): string {
+    const trends = ['incredible improvement', 'amazing gains', 'outstanding progress', 'fantastic results', 'remarkable growth', 'exceptional development', 'phenomenal advancement', 'extraordinary achievement', 'incredible transformation', 'amazing success'];
+    return trends[Math.floor(Math.random() * trends.length)];
+  }
+
+  private static getRandomProgressAdvice(): string {
+    const advice = ['Keep up the great work!', 'Stay consistent!', 'Push harder!', 'Don\'t give up!', 'You\'re on fire!', 'Keep the momentum!', 'Stay focused!', 'You\'re crushing it!', 'Keep going!', 'You\'re amazing!'];
+    return advice[Math.floor(Math.random() * advice.length)];
+  }
+
+  // Advice generators
+  private static getRandomAdviceType(): string {
+    const types = ['expert', 'proven', 'effective', 'powerful', 'game-changing', 'revolutionary', 'cutting-edge', 'advanced', 'professional', 'elite'];
+    return types[Math.floor(Math.random() * types.length)];
+  }
+
+  private static getRandomAdviceContent(): string {
+    const contents = ['consistency is key', 'form over weight', 'recovery is crucial', 'nutrition fuels performance', 'progressive overload works', 'rest days are essential', 'hydration matters', 'sleep is recovery', 'mindset drives results', 'patience pays off'];
+    return contents[Math.floor(Math.random() * contents.length)];
+  }
+
+  private static getRandomAdviceEncouragement(): string {
+    const encouragements = ['You\'ve got this!', 'Let\'s go!', 'Time to shine!', 'You\'re unstoppable!', 'Make it happen!', 'Push harder!', 'Stay strong!', 'Keep going!', 'You\'re amazing!', 'Believe in yourself!'];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+
+  private static getRandomAdviceSituation(): string {
+    const situations = ['plateaus', 'low energy', 'poor recovery', 'inconsistent progress', 'motivation dips', 'form issues', 'overtraining', 'undereating', 'poor sleep', 'stress management'];
+    return situations[Math.floor(Math.random() * situations.length)];
+  }
+
+  private static getRandomAdviceSolution(): string {
+    const solutions = ['focus on form', 'increase rest', 'improve nutrition', 'boost recovery', 'stay consistent', 'track progress', 'set goals', 'find motivation', 'seek support', 'stay patient'];
+    return solutions[Math.floor(Math.random() * solutions.length)];
+  }
+
+  private static getRandomAdviceSupport(): string {
+    const supports = ['I\'m here for you!', 'You\'ve got my support!', 'Let\'s do this together!', 'I believe in you!', 'You\'re not alone!', 'We\'re in this together!', 'You\'re doing great!', 'Keep it up!', 'You\'re amazing!', 'Stay strong!'];
+    return supports[Math.floor(Math.random() * supports.length)];
+  }
+
+  private static getRandomAdviceGoal(): string {
+    const goals = ['building muscle', 'burning fat', 'getting stronger', 'improving performance', 'boosting energy', 'enhancing recovery', 'increasing power', 'developing speed', 'achieving goals', 'transforming your body'];
+    return goals[Math.floor(Math.random() * goals.length)];
+  }
+
+  private static getRandomAdviceKey(): string {
+    const keys = ['consistency', 'patience', 'dedication', 'hard work', 'smart training', 'proper nutrition', 'adequate recovery', 'positive mindset', 'goal setting', 'progress tracking'];
+    return keys[Math.floor(Math.random() * keys.length)];
+  }
+
+  private static getRandomAdviceMotivation(): string {
+    const motivations = ['You\'ve got this!', 'Let\'s go!', 'Time to shine!', 'You\'re unstoppable!', 'Make it happen!', 'Push harder!', 'Stay strong!', 'Keep going!', 'You\'re amazing!', 'Believe in yourself!'];
+    return motivations[Math.floor(Math.random() * motivations.length)];
+  }
+
+  private static getRandomAdviceContext(): string {
+    const contexts = ['training gets tough', 'progress slows down', 'motivation dips', 'energy is low', 'recovery is poor', 'form breaks down', 'goals seem far', 'results plateau', 'consistency wavers', 'doubt creeps in'];
+    return contexts[Math.floor(Math.random() * contexts.length)];
+  }
+
+  private static getRandomAdviceReminder(): string {
+    const reminders = ['why you started', 'how far you\'ve come', 'what you\'re capable of', 'your goals and dreams', 'the progress you\'ve made', 'your strength and power', 'the person you\'re becoming', 'your dedication and commitment', 'the results you\'re getting', 'the transformation happening'];
+    return reminders[Math.floor(Math.random() * reminders.length)];
+  }
+
+  private static getRandomAdviceObjective(): string {
+    const objectives = ['succeed', 'achieve your goals', 'make progress', 'get stronger', 'build muscle', 'burn fat', 'improve performance', 'boost energy', 'enhance recovery', 'transform your body'];
+    return objectives[Math.floor(Math.random() * objectives.length)];
+  }
+
+  private static getRandomAdviceFocus(): string {
+    const focuses = ['consistency', 'patience', 'dedication', 'hard work', 'smart training', 'proper nutrition', 'adequate recovery', 'positive mindset', 'goal setting', 'progress tracking'];
+    return focuses[Math.floor(Math.random() * focuses.length)];
+  }
+
+  // Motivation generators
+  private static getRandomMotivationState(): string {
+    const states = ['incredible', 'amazing', 'outstanding', 'fantastic', 'remarkable', 'exceptional', 'phenomenal', 'extraordinary', 'incredible', 'amazing'];
+    return states[Math.floor(Math.random() * states.length)];
+  }
+
+  private static getRandomMotivationAction(): string {
+    const actions = ['crushing it', 'dominating', 'conquering', 'mastering', 'excelling', 'achieving', 'pushing', 'driving', 'powering', 'fueling'];
+    return actions[Math.floor(Math.random() * actions.length)];
+  }
+
+  private static getRandomMotivationEncouragement(): string {
+    const encouragements = ['You\'ve got this!', 'Let\'s go!', 'Time to shine!', 'You\'re unstoppable!', 'Make it happen!', 'Push harder!', 'Stay strong!', 'Keep going!', 'You\'re amazing!', 'Believe in yourself!'];
+    return encouragements[Math.floor(Math.random() * encouragements.length)];
+  }
+
+  private static getRandomMotivationMoment(): string {
+    const moments = ['rep', 'set', 'workout', 'day', 'week', 'month', 'challenge', 'obstacle', 'setback', 'victory'];
+    return moments[Math.floor(Math.random() * moments.length)];
+  }
+
+  private static getRandomMotivationGoal(): string {
+    const goals = ['your goals', 'success', 'greatness', 'your dreams', 'your potential', 'your best self', 'your transformation', 'your victory', 'your achievement', 'your destiny'];
+    return goals[Math.floor(Math.random() * goals.length)];
+  }
+
+  private static getRandomMotivationSupport(): string {
+    const supports = ['I\'m here for you!', 'You\'ve got my support!', 'Let\'s do this together!', 'I believe in you!', 'You\'re not alone!', 'We\'re in this together!', 'You\'re doing great!', 'Keep it up!', 'You\'re amazing!', 'Stay strong!'];
+    return supports[Math.floor(Math.random() * supports.length)];
+  }
+
+  private static getRandomMotivationQuality(): string {
+    const qualities = ['dedication', 'commitment', 'perseverance', 'determination', 'strength', 'courage', 'resilience', 'passion', 'drive', 'spirit'];
+    return qualities[Math.floor(Math.random() * qualities.length)];
+  }
+
+  private static getRandomMotivationResult(): string {
+    const results = ['inspiring', 'motivating', 'empowering', 'uplifting', 'encouraging', 'supportive', 'amazing', 'incredible', 'outstanding', 'fantastic'];
+    return results[Math.floor(Math.random() * results.length)];
+  }
+
+  private static getRandomMotivationCelebration(): string {
+    const celebrations = ['This is amazing!', 'You\'re crushing it!', 'Keep up the great work!', 'Your dedication is paying off!', 'You\'re making incredible gains!', 'This is exactly what we want to see!', 'Your hard work is showing!', 'You\'re on fire!', 'This is fantastic!', 'You\'re doing incredible!'];
+    return celebrations[Math.floor(Math.random() * celebrations.length)];
+  }
+
+  private static getRandomMotivationReason(): string {
+    const reasons = ['you\'re capable of anything', 'you\'ve come too far to quit', 'you\'re stronger than you know', 'you\'re destined for greatness', 'you\'re meant to succeed', 'you\'re built for this', 'you\'re unstoppable', 'you\'re amazing', 'you\'re incredible', 'you\'re extraordinary'];
+    return reasons[Math.floor(Math.random() * reasons.length)];
+  }
+
+  private static getRandomMotivationStrength(): string {
+    const strengths = ['power', 'strength', 'courage', 'determination', 'will', 'spirit', 'heart', 'soul', 'mind', 'body'];
+    return strengths[Math.floor(Math.random() * strengths.length)];
+  }
+
+  private static getRandomMotivationAchievement(): string {
+    const achievements = ['achieve anything', 'conquer everything', 'master your goals', 'excel beyond limits', 'succeed beyond measure', 'triumph over challenges', 'overcome obstacles', 'reach your potential', 'fulfill your dreams', 'transform your life'];
+    return achievements[Math.floor(Math.random() * achievements.length)];
+  }
+
+  private static generateUniqueSuggestions(intent: string, context: ConversationContext): string[] {
+    const suggestionGenerators = {
+      workout: () => [
+        `Generate new ${this.getRandomWorkoutType()}`,
+        `Modify your ${this.getRandomIntensity()} routine`,
+        `Show ${this.getRandomBodyPart()} tips`,
+        `Track your ${this.getRandomProgressAspect()}`
+      ],
+      nutrition: () => [
+        `Create ${this.getRandomMealType()} plan`,
+        `Track your ${this.getRandomMacro()} intake`,
+        `Calculate your ${this.getRandomNutritionGoal()} macros`,
+        `Get ${this.getRandomAdviceType()} nutrition advice`
+      ],
+      progress: () => [
+        `View your ${this.getRandomProgressMetric()} progress`,
+        `Set new ${this.getRandomProgressGoal()} goals`,
+        `Track your ${this.getRandomProgressAchievement()}`,
+        `Get ${this.getRandomAdviceType()} insights`
+      ],
+      advice: () => [
+        `Get ${this.getRandomAdviceType()} tips`,
+        `Learn ${this.getRandomAdviceContent()}`,
+        `Improve your ${this.getRandomAdviceFocus()}`,
+        `Stay ${this.getRandomMotivationState()}`
+      ],
+      motivation: () => [
+        `Stay ${this.getRandomMotivationState()}`,
+        `Get ${this.getRandomMotivationEncouragement()}`,
+        `Push your ${this.getRandomMotivationAction()}`,
+        `Believe in your ${this.getRandomMotivationStrength()}`
+      ]
+    };
+    
+    const generator = suggestionGenerators[intent as keyof typeof suggestionGenerators] || suggestionGenerators.advice;
+    return generator();
+  }
+
+  private static generateUniqueAction(intent: string, analysis: any): string {
+    const actionGenerators = {
+      workout: () => `${this.getRandomAction()}_${this.getRandomWorkoutType()}`,
+      nutrition: () => `${this.getRandomNutritionAction()}_${this.getRandomMealType()}`,
+      progress: () => `${this.getRandomProgressAction()}_${this.getRandomProgressAspect()}`,
+      advice: () => `${this.getRandomAdviceType()}_${this.getRandomAdviceContent()}`,
+      motivation: () => `${this.getRandomMotivationAction()}_${this.getRandomMotivationGoal()}`
+    };
+    
+    const generator = actionGenerators[intent as keyof typeof actionGenerators] || actionGenerators.advice;
+    return generator();
   }
 
   private static getRandomSuggestions(intent: string): string[] {
