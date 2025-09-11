@@ -43,7 +43,7 @@ import AuthModal from './components/AuthModal';
 import ResearchPanel from './components/ResearchPanel';
 import ProfileSetup from './components/ProfileSetup';
 import ProfilePage from './components/ProfilePage';
-import AIChat from './components/AIChat';
+import SmartAIChat from './components/SmartAIChat';
 import SmartDashboard from './components/SmartDashboard';
 import './App.css';
 
@@ -272,7 +272,7 @@ function App() {
         case 0:
           return <EnhancedDashboard />;
         case 1:
-          return <AIChat />;
+          return <SmartAIChat />;
         case 2:
           return <SmartDashboard />;
         case 3:

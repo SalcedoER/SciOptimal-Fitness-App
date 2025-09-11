@@ -176,10 +176,7 @@ export class IntelligentResponseGenerator {
 }
 
 // Enhanced conversation memory system
-export class ConversationMemory {
-  private static memory: Map<string, ConversationMemoryEntry[]> = new Map();
-  
-  interface ConversationMemoryEntry {
+interface ConversationMemoryEntry {
     timestamp: Date;
     userMessage: string;
     aiResponse: string;
@@ -189,6 +186,9 @@ export class ConversationMemory {
     entities: any[];
     intent: string;
   }
+
+export class ConversationMemory {
+  private static memory: Map<string, ConversationMemoryEntry[]> = new Map();
   
   static storeInteraction(
     sessionId: string,
