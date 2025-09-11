@@ -423,3 +423,4 @@ export class HealthIntegrationService {
     return Math.round(score / factors);
   }
 }
+

@@ -27,3 +27,4 @@ console.log('LocalStorage available:', typeof localStorage !== 'undefined');
 console.log('Window available:', typeof window !== 'undefined');
 
 console.log('=== End Debug ===');
+

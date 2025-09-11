@@ -729,3 +729,4 @@ class GoalCurationService {
 }
 
 export const goalCurationService = new GoalCurationService();
+
