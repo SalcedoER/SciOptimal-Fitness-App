@@ -47,7 +47,7 @@ import {
   Speed
 } from '@mui/icons-material';
 import { useAppStore } from '../store';
-import { AdvancedIntelligentAI } from '../services/advancedIntelligentAI';
+import { IntelligentAI } from '../services/intelligentAI';
 import SmartFoodScanner from './SmartFoodScanner';
 
 interface Message {
@@ -244,8 +244,8 @@ export default function SmartAIChat() {
     addMessage('user', userMessage);
 
     try {
-      // Use the advanced intelligent AI system
-      const response = await AdvancedIntelligentAI.generateResponse(
+      // Use the intelligent AI system
+      const response = await IntelligentAI.generateResponse(
         userMessage,
         userProfile,
         workoutHistory,

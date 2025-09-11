@@ -283,9 +283,16 @@ export class IntelligentAI {
     
     const recentWorkouts = context.workoutHistory.slice(-3);
     const workoutCount = recentWorkouts.length;
+    const randomSeed = Date.now() % 1000;
     
     if (workoutCount === 0) {
-      return `Welcome to your fitness journey! As a ${context.userProfile.targetPhysique}, I'll create personalized workouts to help you reach your goals. Let's start with a comprehensive workout plan!`;
+      const responses = [
+        `Welcome to your fitness journey! As a ${context.userProfile.targetPhysique}, I'll create personalized workouts to help you reach your goals. Let's start with a comprehensive workout plan!`,
+        `Time to unleash your potential! Your ${context.userProfile.targetPhysique} goals are achievable with the right training approach. Let me design workouts that maximize your genetic potential.`,
+        `Your transformation starts now! I'll create a personalized training program specifically designed for your ${context.userProfile.targetPhysique} aspirations. Ready to dominate?`,
+        `Let's build something incredible! Your ${context.userProfile.targetPhysique} journey begins with a strategic training plan tailored to your unique physique.`
+      ];
+      return responses[randomSeed % responses.length];
     }
     
     const lastWorkout = recentWorkouts[recentWorkouts.length - 1];
@@ -293,11 +300,29 @@ export class IntelligentAI {
       Math.floor((Date.now() - new Date(lastWorkout.date).getTime()) / (1000 * 60 * 60 * 24)) : 0;
     
     if (daysSinceLastWorkout === 0) {
-      return `Great job completing your workout today! Your ${context.userProfile.targetPhysique} goals are within reach. Would you like me to plan your next session or help with recovery?`;
+      const responses = [
+        `Great job completing your workout today! Your ${context.userProfile.targetPhysique} goals are within reach. Would you like me to plan your next session or help with recovery?`,
+        `Excellent work today! Your dedication to becoming a ${context.userProfile.targetPhysique} is inspiring. What's next on your agenda?`,
+        `Outstanding performance! You're one step closer to your ${context.userProfile.targetPhysique} goals. Ready for your next challenge?`,
+        `Amazing effort! Your ${context.userProfile.targetPhysique} transformation is happening. How are you feeling?`
+      ];
+      return responses[randomSeed % responses.length];
     } else if (daysSinceLastWorkout === 1) {
-      return `Perfect timing for your next workout! I've noticed you're consistent with your training. Let me create an optimized session for your ${context.userProfile.targetPhysique} goals.`;
+      const responses = [
+        `Perfect timing for your next workout! I've noticed you're consistent with your training. Let me create an optimized session for your ${context.userProfile.targetPhysique} goals.`,
+        `Excellent timing! Your dedication is paying off. Time for another powerful workout designed for your ${context.userProfile.targetPhysique} aspirations.`,
+        `Right on schedule! Your ${context.userProfile.targetPhysique} goals need this consistency. Ready to train?`,
+        `Perfect! Your discipline is impressive. Let's build on your progress with a targeted ${context.userProfile.targetPhysique} workout.`
+      ];
+      return responses[randomSeed % responses.length];
     } else {
-      return `I see it's been ${daysSinceLastWorkout} days since your last workout. No worries! Let's get back on track with a motivating session designed for your ${context.userProfile.targetPhysique} goals.`;
+      const responses = [
+        `I see it's been ${daysSinceLastWorkout} days since your last workout. No worries! Let's get back on track with a motivating session designed for your ${context.userProfile.targetPhysique} goals.`,
+        `A ${daysSinceLastWorkout} day break is totally fine! Time to reignite your passion with a fresh workout designed for your ${context.userProfile.targetPhysique} aspirations.`,
+        `Don't stress about the ${daysSinceLastWorkout} day gap! Your ${context.userProfile.targetPhysique} journey continues today. Let's ease back in.`,
+        `The ${daysSinceLastWorkout} day pause is behind us! Time to get back to crushing your ${context.userProfile.targetPhysique} goals.`
+      ];
+      return responses[randomSeed % responses.length];
     }
   }
 
@@ -309,15 +334,28 @@ export class IntelligentAI {
     const todayNutrition = context.nutritionLog.filter(n => 
       new Date(n.date).toDateString() === new Date().toDateString()
     );
+    const randomSeed = Date.now() % 1000;
     
     if (todayNutrition.length === 0) {
-      return `Let's fuel your ${context.userProfile.targetPhysique} goals! I'll help you track your nutrition and create a meal plan that supports your training. What would you like to log first?`;
+      const responses = [
+        `Let's fuel your ${context.userProfile.targetPhysique} goals! I'll help you track your nutrition and create a meal plan that supports your training. What would you like to log first?`,
+        `Time to optimize your nutrition for ${context.userProfile.targetPhysique} success! I'll guide you through macro tracking and meal planning. Ready to start?`,
+        `Your ${context.userProfile.targetPhysique} transformation needs proper fuel! Let's create a nutrition plan that maximizes your results. What's on your plate?`,
+        `Nutrition is the foundation of your ${context.userProfile.targetPhysique} goals! I'll help you track macros and plan meals. What would you like to log?`
+      ];
+      return responses[randomSeed % responses.length];
     }
     
     const totalCalories = todayNutrition.reduce((sum, n) => sum + n.calories, 0);
     const totalProtein = todayNutrition.reduce((sum, n) => sum + n.protein, 0);
     
-    return `Great job tracking your nutrition today! You've logged ${totalCalories} calories and ${totalProtein.toFixed(1)}g protein. For your ${context.userProfile.targetPhysique} goals, I can help optimize your macro balance. What would you like to add next?`;
+    const responses = [
+      `Great job tracking your nutrition today! You've logged ${totalCalories} calories and ${totalProtein.toFixed(1)}g protein. For your ${context.userProfile.targetPhysique} goals, I can help optimize your macro balance. What would you like to add next?`,
+      `Excellent nutrition tracking! ${totalCalories} calories and ${totalProtein.toFixed(1)}g protein logged. Your ${context.userProfile.targetPhysique} goals are getting the fuel they need. What's next?`,
+      `Outstanding macro tracking! ${totalCalories} calories and ${totalProtein.toFixed(1)}g protein so far. Your ${context.userProfile.targetPhysique} transformation is well-fueled. Ready for more?`,
+      `Perfect nutrition logging! ${totalCalories} calories and ${totalProtein.toFixed(1)}g protein recorded. Your ${context.userProfile.targetPhysique} goals are being supported. What else?`
+    ];
+    return responses[randomSeed % responses.length];
   }
 
   private static getProgressResponse(context: ConversationContext): string {
