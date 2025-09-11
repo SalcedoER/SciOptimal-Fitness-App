@@ -122,7 +122,6 @@ class ErrorBoundary extends React.Component<any, { hasError: boolean; error: any
   }
 
   componentDidCatch(error: any, errorInfo: any) {
-    console.error('Error caught by boundary:', error, errorInfo);
   }
 
   render() {
@@ -204,7 +203,6 @@ function App() {
   // Load user data when authenticated
   React.useEffect(() => {
     if (isAuthenticated && !userProfile) {
-      loadUserData().catch(console.error);
     }
   }, [isAuthenticated, userProfile, loadUserData]);
 
@@ -287,7 +285,6 @@ function App() {
           return <EnhancedDashboard />;
       }
     } catch (error) {
-      console.error('Error rendering tab content:', error);
       return (
         <Box sx={{ p: 3, textAlign: 'center' }}>
           <Typography variant="h6" sx={{ color: '#ffffff' }}>

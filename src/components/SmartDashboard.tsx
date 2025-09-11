@@ -111,7 +111,6 @@ export default function SmartDashboard() {
       }
 
     } catch (error) {
-      console.error('Error loading smart data:', error);
     } finally {
       setIsLoading(false);
     }

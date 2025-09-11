@@ -75,7 +75,6 @@ export default function ResearchPanel() {
       const allStudies = researchAIService.getStudiesByCategory('workout');
       setStudies(allStudies);
     } catch (error) {
-      console.error('Failed to generate recommendations:', error);
     } finally {
       setLoading(false);
     }

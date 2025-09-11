@@ -87,7 +87,6 @@ export default function SmartFoodScanner({ open, onClose, onFoodDetected }: Smar
       }
     } catch (err) {
       setError('Camera access denied. Please allow camera access to scan food.');
-      console.error('Camera error:', err);
     }
   }, []);
 

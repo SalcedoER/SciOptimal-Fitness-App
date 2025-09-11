@@ -18,7 +18,6 @@ class HealthKitService {
 
   async requestPermissions(): Promise<boolean> {
     if (!this.isAvailable) {
-      console.warn('HealthKit not available on this device');
       return false;
     }
 
@@ -38,7 +37,6 @@ class HealthKitService {
       this.permissions = permissions;
       return Object.values(permissions).every(Boolean);
     } catch (error) {
-      console.error('Failed to request HealthKit permissions:', error);
       return false;
     }
   }
@@ -62,7 +60,6 @@ class HealthKitService {
         context: this.determineHeartRateContext(item.value, item.metadata)
       }));
     } catch (error) {
-      console.error('Failed to fetch heart rate data:', error);
       return [];
     }
   }
@@ -87,7 +84,6 @@ class HealthKitService {
         activeMinutes: item.activeMinutes || 0
       }));
     } catch (error) {
-      console.error('Failed to fetch steps data:', error);
       return [];
     }
   }
@@ -116,7 +112,6 @@ class HealthKitService {
         efficiency: item.efficiency || 0
       }));
     } catch (error) {
-      console.error('Failed to fetch sleep data:', error);
       return [];
     }
   }
@@ -147,7 +142,6 @@ class HealthKitService {
         pace: item.pace
       }));
     } catch (error) {
-      console.error('Failed to fetch workout data:', error);
       return [];
     }
   }
@@ -170,7 +164,6 @@ class HealthKitService {
         source: 'Apple Watch'
       }));
     } catch (error) {
-      console.error('Failed to fetch HRV data:', error);
       return [];
     }
   }
@@ -194,7 +187,6 @@ class HealthKitService {
         total: item.total
       }));
     } catch (error) {
-      console.error('Failed to fetch energy data:', error);
       return [];
     }
   }
@@ -212,7 +204,6 @@ class HealthKitService {
 
       return data[0]?.value || 0;
     } catch (error) {
-      console.error('Failed to fetch resting heart rate:', error);
       return 0;
     }
   }
@@ -230,7 +221,6 @@ class HealthKitService {
 
       return data[0]?.value || 0;
     } catch (error) {
-      console.error('Failed to fetch VO2 Max:', error);
       return 0;
     }
   }
@@ -269,7 +259,6 @@ class HealthKitService {
         lastSync: new Date()
       };
     } catch (error) {
-      console.error('Failed to fetch all health data:', error);
       throw error;
     }
   }

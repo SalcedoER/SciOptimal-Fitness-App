@@ -163,7 +163,6 @@ export default function WorkoutTracker({ workout, onComplete, onClose }: Workout
       onComplete(completedWorkout);
       
     } catch (error) {
-      console.error('Error completing workout:', error);
     } finally {
       setIsCompleting(false);
     }

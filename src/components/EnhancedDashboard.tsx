@@ -71,7 +71,6 @@ export default function EnhancedDashboard() {
 
   useEffect(() => {
     if (userProfile && !isOptimizing) {
-      console.log('Running AI optimization...');
       runAIOptimization();
     }
   }, [userProfile, isOptimizing, runAIOptimization]);
@@ -103,13 +102,11 @@ export default function EnhancedDashboard() {
   };
 
   const handleAcceptWorkout = () => {
-    console.log('Accepting workout...');
     setWorkoutAccepted(true);
     // You could also add the workout to workoutHistory here if desired
   };
 
   const handleChangeWorkout = async () => {
-    console.log('Changing workout...');
     setIsGeneratingWorkout(true);
     try {
       generateTodaysWorkout();
@@ -119,7 +116,6 @@ export default function EnhancedDashboard() {
         setIsGeneratingWorkout(false);
       }, 1000);
     } catch (error) {
-      console.error('Error generating workout:', error);
       setIsGeneratingWorkout(false);
     }
   };
