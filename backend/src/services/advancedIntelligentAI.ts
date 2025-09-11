@@ -459,37 +459,67 @@ export class AdvancedIntelligentAI {
     
     this.responseVariations.set('workout', [
       "Let's get you moving! 💪",
-      "Time to crush your workout! 🔥",
+      "Time to crush your workout! 🔥", 
       "Ready to build some strength? 🏋️",
-      "Let's make those gains! 💯"
+      "Let's make those gains! 💯",
+      "Time to push your limits! 🚀",
+      "Let's turn up the intensity! ⚡",
+      "Ready to dominate today? 👑",
+      "Let's build that power! 💥",
+      "Time to sweat it out! 💦",
+      "Let's get after it! 🎯"
     ]);
     
     this.responseVariations.set('nutrition', [
       "Let's fuel your body right! 🥗",
       "Time to optimize your nutrition! 🍎",
       "Let's get those macros dialed in! 📊",
-      "Ready to eat for your goals? 🎯"
+      "Ready to eat for your goals? 🎯",
+      "Let's nourish those muscles! 🥩",
+      "Time to feed your gains! 🍗",
+      "Let's fuel your performance! ⚡",
+      "Ready to optimize your diet? 🥑",
+      "Let's get those nutrients! 🌟",
+      "Time to eat smart! 🧠"
     ]);
     
     this.responseVariations.set('progress', [
       "Let's see how you're doing! 📈",
       "Time to check your progress! 📊",
       "Let's analyze your results! 🔍",
-      "Ready to see your improvements? 🎉"
+      "Ready to see your improvements? 🎉",
+      "Let's track your success! 🏆",
+      "Time to measure your gains! 📏",
+      "Let's review your journey! 🗺️",
+      "Ready to see your growth? 🌱",
+      "Let's celebrate your wins! 🎊",
+      "Time to assess your performance! 📋"
     ]);
     
     this.responseVariations.set('advice', [
       "I've got some great tips for you! 💡",
       "Let me share some wisdom! 🧠",
       "Here's what I recommend! ⭐",
-      "I have some insights to share! 🔍"
+      "I have some insights to share! 🔍",
+      "Let me give you some expert advice! 🎓",
+      "I've got some proven strategies! 🎯",
+      "Here are some game-changing tips! 🚀",
+      "Let me share some secrets! 🤫",
+      "I have some valuable insights! 💎",
+      "Here's some expert guidance! 🧭"
     ]);
     
     this.responseVariations.set('motivation', [
       "You've got this! I believe in you! 💪",
       "Keep pushing forward! You're doing great! 🌟",
       "Every step counts! Keep going! 🚀",
-      "You're stronger than you think! 💯"
+      "You're stronger than you think! 💯",
+      "You're crushing it! Keep it up! 🔥",
+      "Your dedication is inspiring! 🌟",
+      "You're on fire! Don't stop! 🔥",
+      "You're making amazing progress! 🎉",
+      "You're unstoppable! Keep going! ⚡",
+      "You're doing incredible! Stay strong! 💪"
     ]);
   }
 
@@ -554,8 +584,14 @@ export class AdvancedIntelligentAI {
 
   private static getWorkoutResponse(context: ConversationContext): any {
     if (!context.userProfile) {
+      const responses = [
+        "I'd love to help with your workouts! Please complete your profile first so I can give you personalized workout recommendations.",
+        "Ready to start your fitness journey? Complete your profile and I'll create custom workouts just for you!",
+        "Let's get you set up! Fill out your profile and I'll design workouts tailored to your goals.",
+        "I'm excited to help you train! First, let's complete your profile so I can create the perfect workout plan."
+      ];
       return {
-        content: "I'd love to help with your workouts! Please complete your profile first so I can give you personalized workout recommendations.",
+        content: responses[Math.floor(Math.random() * responses.length)],
         suggestions: ["Complete my profile", "Get general workout tips", "Learn about exercises"],
         action: 'profile_setup'
       };
@@ -570,15 +606,45 @@ export class AdvancedIntelligentAI {
     let content = "";
     
     if (workoutCount === 0) {
-      content = `Welcome to your fitness journey! As a ${context.userProfile.targetPhysique}, I'll create personalized workouts to help you reach your goals. Let's start with a comprehensive workout plan!`;
+      const responses = [
+        `Welcome to your fitness journey! As a ${context.userProfile.targetPhysique}, I'll create personalized workouts to help you reach your goals. Let's start with a comprehensive workout plan!`,
+        `Ready to transform your body? Your ${context.userProfile.targetPhysique} goals are achievable with the right training. Let's build your perfect workout routine!`,
+        `Time to unleash your potential! I'll design workouts specifically for your ${context.userProfile.targetPhysique} aspirations. Let's get started!`,
+        `Your fitness journey begins now! As a ${context.userProfile.targetPhysique}, I'll create workouts that push you to your limits. Ready to dominate?`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     } else if (daysSinceLastWorkout === 0) {
-      content = `Great job completing your workout today! Your ${context.userProfile.targetPhysique} goals are within reach. Would you like me to plan your next session or help with recovery?`;
+      const responses = [
+        `Amazing work today! Your ${context.userProfile.targetPhysique} goals are within reach. Ready for your next challenge?`,
+        `You crushed it! Your dedication to becoming a ${context.userProfile.targetPhysique} is inspiring. What's next?`,
+        `Outstanding performance! You're one step closer to your ${context.userProfile.targetPhysique} goals. Let's keep this momentum!`,
+        `Incredible effort! Your ${context.userProfile.targetPhysique} transformation is happening. Ready for more?`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     } else if (daysSinceLastWorkout === 1) {
-      content = `Perfect timing for your next workout! I've noticed you're consistent with your training. Let me create an optimized session for your ${context.userProfile.targetPhysique} goals.`;
+      const responses = [
+        `Perfect timing! Your consistency is paying off. Let me create an optimized session for your ${context.userProfile.targetPhysique} goals.`,
+        `Right on schedule! I love your dedication. Time for another powerful workout designed for your ${context.userProfile.targetPhysique} aspirations.`,
+        `Excellent timing! Your commitment is showing. Let's build on your progress with a targeted ${context.userProfile.targetPhysique} workout.`,
+        `Perfect! Your discipline is impressive. Ready for another session that will push your ${context.userProfile.targetPhysique} goals forward?`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     } else if (daysSinceLastWorkout <= 3) {
-      content = `I see it's been ${daysSinceLastWorkout} days since your last workout. No worries! Let's get back on track with a motivating session designed for your ${context.userProfile.targetPhysique} goals.`;
+      const responses = [
+        `No worries about the ${daysSinceLastWorkout} day break! Let's get back on track with a motivating session for your ${context.userProfile.targetPhysique} goals.`,
+        `A ${daysSinceLastWorkout} day pause is totally fine! Time to reignite your passion with a fresh workout designed for your ${context.userProfile.targetPhysique} aspirations.`,
+        `Don't stress about the ${daysSinceLastWorkout} day gap! Let's bounce back stronger with a workout that will reignite your ${context.userProfile.targetPhysique} journey.`,
+        `The ${daysSinceLastWorkout} day break is behind us! Let's get back to crushing your ${context.userProfile.targetPhysique} goals with renewed energy.`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     } else {
-      content = `It's been ${daysSinceLastWorkout} days since your last workout. Let's restart your momentum with a fresh, energizing session tailored to your ${context.userProfile.targetPhysique} goals!`;
+      const responses = [
+        `Let's restart your momentum! A fresh, energizing session tailored to your ${context.userProfile.targetPhysique} goals will get you back on track.`,
+        `Time to reignite your passion! I'll create a powerful workout that will remind you why you're pursuing your ${context.userProfile.targetPhysique} dreams.`,
+        `Let's get back to greatness! A motivating session designed for your ${context.userProfile.targetPhysique} goals will jumpstart your journey again.`,
+        `Ready to reclaim your power? Let's restart with a workout that will reignite your ${context.userProfile.targetPhysique} transformation.`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     }
     
     return {
@@ -595,8 +661,14 @@ export class AdvancedIntelligentAI {
 
   private static getNutritionResponse(context: ConversationContext): any {
     if (!context.userProfile) {
+      const responses = [
+        "I'd love to help with your nutrition! Please complete your profile first so I can calculate your personalized macro targets.",
+        "Ready to optimize your diet? Complete your profile and I'll create a nutrition plan tailored to your goals!",
+        "Let's fuel your success! Fill out your profile and I'll design a meal plan that works for you.",
+        "Time to eat smart! Complete your profile and I'll calculate your perfect macro targets."
+      ];
       return {
-        content: "I'd love to help with your nutrition! Please complete your profile first so I can calculate your personalized macro targets.",
+        content: responses[Math.floor(Math.random() * responses.length)],
         suggestions: ["Complete my profile", "Get general nutrition tips", "Learn about macros"],
         action: 'profile_setup'
       };
@@ -609,14 +681,26 @@ export class AdvancedIntelligentAI {
     let content = "";
     
     if (todayNutrition.length === 0) {
-      content = `Let's fuel your ${context.userProfile.targetPhysique} goals! I'll help you track your nutrition and create a meal plan that supports your training. What would you like to log first?`;
+      const responses = [
+        `Let's fuel your ${context.userProfile.targetPhysique} goals! I'll help you track your nutrition and create a meal plan that supports your training. What would you like to log first?`,
+        `Time to optimize your nutrition for your ${context.userProfile.targetPhysique} transformation! Let's track your food and create the perfect meal plan. What should we start with?`,
+        `Ready to eat for your goals? I'll help you fuel your ${context.userProfile.targetPhysique} journey with smart nutrition tracking. What's first on your plate?`,
+        `Let's get your nutrition dialed in! Your ${context.userProfile.targetPhysique} goals need proper fuel. What would you like to track first?`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     } else {
       const totalCalories = todayNutrition.reduce((sum, n) => sum + n.calories, 0);
       const totalProtein = todayNutrition.reduce((sum, n) => sum + n.protein, 0);
       const totalCarbs = todayNutrition.reduce((sum, n) => sum + n.carbs, 0);
       const totalFat = todayNutrition.reduce((sum, n) => sum + n.fat, 0);
       
-      content = `Great job tracking your nutrition today! You've logged ${totalCalories} calories (${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, ${totalFat.toFixed(1)}g fat). For your ${context.userProfile.targetPhysique} goals, I can help optimize your macro balance. What would you like to add next?`;
+      const responses = [
+        `Excellent nutrition tracking! You've logged ${totalCalories} calories (${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, ${totalFat.toFixed(1)}g fat). For your ${context.userProfile.targetPhysique} goals, I can help optimize your macro balance. What's next?`,
+        `Great job on your nutrition! ${totalCalories} calories with ${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, and ${totalFat.toFixed(1)}g fat. Let's fine-tune this for your ${context.userProfile.targetPhysique} success!`,
+        `Outstanding tracking! ${totalCalories} calories logged with solid macros (${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, ${totalFat.toFixed(1)}g fat). Ready to optimize for your ${context.userProfile.targetPhysique} goals?`,
+        `Perfect nutrition logging! You're at ${totalCalories} calories with ${totalProtein.toFixed(1)}g protein, ${totalCarbs.toFixed(1)}g carbs, and ${totalFat.toFixed(1)}g fat. Let's make this work for your ${context.userProfile.targetPhysique} transformation!`
+      ];
+      content = responses[Math.floor(Math.random() * responses.length)];
     }
     
     return {
