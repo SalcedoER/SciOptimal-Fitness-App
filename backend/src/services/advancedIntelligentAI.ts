@@ -439,7 +439,7 @@ export class AdvancedIntelligentAI {
   }
 
   private static generateCompletelyDynamicResponse(intent: string, context: ConversationContext, analysis: any): any {
-    // Generate intelligent, contextual responses based on user data and situation
+    // Generate truly intelligent, contextual responses based on user data and situation
     const content = this.generateIntelligentContent(intent, context, analysis);
     const suggestions = this.generateContextualSuggestions(intent, context, analysis);
     const action = this.determineSmartAction(intent, context, analysis);
@@ -457,24 +457,27 @@ export class AdvancedIntelligentAI {
     const recentWorkouts = context.workoutHistory.slice(-3);
     const recentNutrition = context.nutritionLog.slice(-7);
     
-    // Generate intelligent responses based on actual user data and context
+    // Generate truly intelligent, non-repetitive responses based on actual user data and context
+    const timestamp = Date.now();
+    const randomSeed = timestamp % 1000;
+    
     switch (intent) {
       case 'workout':
-        return this.generateSmartWorkoutResponse(userProfile, recentWorkouts, context, analysis);
+        return this.generateSmartWorkoutResponse(userProfile, recentWorkouts, context, analysis, randomSeed);
       case 'nutrition':
-        return this.generateSmartNutritionResponse(userProfile, recentNutrition, context, analysis);
+        return this.generateSmartNutritionResponse(userProfile, recentNutrition, context, analysis, randomSeed);
       case 'progress':
-        return this.generateSmartProgressResponse(userProfile, recentWorkouts, recentNutrition, context, analysis);
+        return this.generateSmartProgressResponse(userProfile, recentWorkouts, recentNutrition, context, analysis, randomSeed);
       case 'advice':
-        return this.generateSmartAdviceResponse(userProfile, context, analysis);
+        return this.generateSmartAdviceResponse(userProfile, context, analysis, randomSeed);
       case 'motivation':
-        return this.generateSmartMotivationResponse(userProfile, recentWorkouts, context, analysis);
+        return this.generateSmartMotivationResponse(userProfile, recentWorkouts, context, analysis, randomSeed);
       default:
-        return this.generateSmartGeneralResponse(userProfile, context, analysis);
+        return this.generateSmartGeneralResponse(userProfile, context, analysis, randomSeed);
     }
   }
 
-  private static generateSmartWorkoutResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], context: ConversationContext, analysis: any): string {
+  private static generateSmartWorkoutResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], context: ConversationContext, analysis: any, randomSeed: number): string {
     if (!userProfile) {
       return "I'd love to help you with your workouts! First, let's complete your profile so I can create personalized training plans that match your goals and fitness level.";
     }
@@ -487,26 +490,62 @@ export class AdvancedIntelligentAI {
     const avgRPE = recentWorkouts.length > 0 ? 
       recentWorkouts.reduce((sum, w) => sum + (w.rpe || 5), 0) / recentWorkouts.length : 5;
 
-    // Intelligent analysis based on actual data
+    // Generate dynamic responses based on actual data with variation
     if (workoutCount === 0) {
-      return `Welcome to your fitness journey! As someone targeting a ${userProfile.targetPhysique} physique, I'll create a comprehensive training plan that builds strength, power, and athleticism. Your current stats (${userProfile.weight}lbs, ${userProfile.height}cm) suggest we should focus on compound movements and progressive overload. Ready to start?`;
+      const responses = [
+        `Welcome to your fitness journey! As someone targeting a ${userProfile.targetPhysique} physique, I'll create a comprehensive training plan that builds strength, power, and athleticism. Your current stats (${userProfile.weight}lbs, ${userProfile.height}cm) suggest we should focus on compound movements and progressive overload. Ready to start?`,
+        `Time to unleash your potential! Your ${userProfile.targetPhysique} goals are achievable with the right training approach. Based on your stats (${userProfile.weight}lbs, ${userProfile.height}cm), I'll design workouts that maximize your genetic potential. Let's begin!`,
+        `Your transformation starts now! I'll create a personalized training program specifically designed for your ${userProfile.targetPhysique} aspirations. With your current build (${userProfile.weight}lbs, ${userProfile.height}cm), we'll focus on strength, power, and athletic development. Ready to dominate?`,
+        `Let's build something incredible! Your ${userProfile.targetPhysique} journey begins with a strategic training plan tailored to your unique physique (${userProfile.weight}lbs, ${userProfile.height}cm). I'll ensure every workout moves you closer to your goals. Shall we start?`
+      ];
+      return responses[randomSeed % responses.length];
     } else if (daysSinceLastWorkout === 0) {
       const lastRPE = lastWorkout?.rpe || 5;
       if (lastRPE >= 8) {
-        return `Excellent work today! That was a high-intensity session (RPE ${lastRPE}). For your ${userProfile.targetPhysique} goals, I recommend focusing on recovery - proper nutrition, hydration, and sleep. Tomorrow we can do active recovery or a lighter session. How are you feeling?`;
+        const responses = [
+          `Excellent work today! That was a high-intensity session (RPE ${lastRPE}). For your ${userProfile.targetPhysique} goals, I recommend focusing on recovery - proper nutrition, hydration, and sleep. Tomorrow we can do active recovery or a lighter session. How are you feeling?`,
+          `Outstanding performance! Your RPE ${lastRPE} shows incredible dedication. For your ${userProfile.targetPhysique} transformation, prioritize recovery now - quality sleep, proper nutrition, and light movement. You've earned this rest!`,
+          `Incredible effort today! That RPE ${lastRPE} session was intense. Your ${userProfile.targetPhysique} goals require smart recovery. Focus on hydration, protein, and 8+ hours sleep. Tomorrow, active recovery or a light session. How's your energy?`,
+          `Amazing work! RPE ${lastRPE} shows you're pushing limits. For your ${userProfile.targetPhysique} success, recovery is crucial now. Rest, refuel, and recharge. Tomorrow we'll do something lighter to keep momentum. Feeling strong?`
+        ];
+        return responses[randomSeed % responses.length];
       } else {
-        return `Good session today! Since your RPE was ${lastRPE}, you have room to push harder next time. For your ${userProfile.targetPhysique} transformation, we need to progressively overload. What muscle groups felt strongest today?`;
+        const responses = [
+          `Good session today! Since your RPE was ${lastRPE}, you have room to push harder next time. For your ${userProfile.targetPhysique} transformation, we need to progressively overload. What muscle groups felt strongest today?`,
+          `Solid work! RPE ${lastRPE} means you can definitely go harder next session. Your ${userProfile.targetPhysique} goals require progressive overload. Which exercises felt most challenging?`,
+          `Nice session! With RPE ${lastRPE}, you've got more in the tank. For your ${userProfile.targetPhysique} development, we need to increase intensity gradually. What felt strongest today?`,
+          `Good effort! RPE ${lastRPE} shows room for growth. Your ${userProfile.targetPhysique} transformation needs progressive overload. Which movements felt most powerful?`
+        ];
+        return responses[randomSeed % responses.length];
       }
     } else if (daysSinceLastWorkout === 1) {
-      return `Perfect timing for your next workout! Your consistency is key for ${userProfile.targetPhysique} development. Based on your last session, I suggest focusing on upper body to balance your training. Ready to train?`;
+      const responses = [
+        `Perfect timing for your next workout! Your consistency is key for ${userProfile.targetPhysique} development. Based on your last session, I suggest focusing on upper body to balance your training. Ready to train?`,
+        `Excellent timing! Your dedication to becoming a ${userProfile.targetPhysique} is paying off. Let's target your upper body today to complement your last session. Feeling ready?`,
+        `Right on schedule! Your ${userProfile.targetPhysique} goals need this consistency. I recommend an upper body focus today to balance your training. Let's go!`,
+        `Perfect! Your ${userProfile.targetPhysique} transformation thrives on consistency. Today, let's work your upper body to create balance with your last session. Ready to crush it?`
+      ];
+      return responses[randomSeed % responses.length];
     } else if (daysSinceLastWorkout <= 3) {
-      return `It's been ${daysSinceLastWorkout} days since your last workout. No worries - life happens! For your ${userProfile.targetPhysique} goals, let's get back on track with a session that matches your current energy level. What's your preference: upper body, lower body, or full body?`;
+      const responses = [
+        `It's been ${daysSinceLastWorkout} days since your last workout. No worries - life happens! For your ${userProfile.targetPhysique} goals, let's get back on track with a session that matches your current energy level. What's your preference: upper body, lower body, or full body?`,
+        `A ${daysSinceLastWorkout} day break is totally fine! Let's reignite your passion with a fresh workout designed for your ${userProfile.targetPhysique} aspirations. What sounds good: upper, lower, or full body?`,
+        `Don't stress about the ${daysSinceLastWorkout} day gap! Your ${userProfile.targetPhysique} journey continues today. Let's ease back in with a session that fits your energy. Upper, lower, or full body?`,
+        `The ${daysSinceLastWorkout} day pause is behind us! Time to get back to crushing your ${userProfile.targetPhysique} goals. What type of session appeals to you: upper, lower, or full body?`
+      ];
+      return responses[randomSeed % responses.length];
     } else {
-      return `Welcome back! It's been ${daysSinceLastWorkout} days since your last workout. For your ${userProfile.targetPhysique} goals, we need to restart gradually to avoid injury. I recommend starting with a moderate-intensity full-body session to re-engage your muscles. Sound good?`;
+      const responses = [
+        `Let's restart your momentum! A fresh, energizing session tailored to your ${userProfile.targetPhysique} goals will get you back on track.`,
+        `Time to reignite your passion! I'll create a powerful workout that will remind you why you're pursuing your ${userProfile.targetPhysique} dreams.`,
+        `Let's get back to greatness! A motivating session designed for your ${userProfile.targetPhysique} goals will jumpstart your journey again.`,
+        `Ready to reclaim your power? Let's restart with a workout that will reignite your ${userProfile.targetPhysique} transformation.`
+      ];
+      return responses[randomSeed % responses.length];
     }
   }
 
-  private static generateSmartNutritionResponse(userProfile: UserProfile | null, recentNutrition: NutritionEntry[], context: ConversationContext, analysis: any): string {
+  private static generateSmartNutritionResponse(userProfile: UserProfile | null, recentNutrition: NutritionEntry[], context: ConversationContext, analysis: any, randomSeed: number): string {
     if (!userProfile) {
       return "I'd love to help optimize your nutrition! Please complete your profile first so I can calculate your precise macro targets based on your goals, body composition, and activity level.";
     }
@@ -536,7 +575,7 @@ export class AdvancedIntelligentAI {
     }
   }
 
-  private static generateSmartProgressResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], recentNutrition: NutritionEntry[], context: ConversationContext, analysis: any): string {
+  private static generateSmartProgressResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], recentNutrition: NutritionEntry[], context: ConversationContext, analysis: any, randomSeed: number): string {
     if (!userProfile) {
       return "I'd love to analyze your progress! Please complete your profile first so I can track your journey toward your fitness goals.";
     }
@@ -558,7 +597,7 @@ export class AdvancedIntelligentAI {
     }
   }
 
-  private static generateSmartAdviceResponse(userProfile: UserProfile | null, context: ConversationContext, analysis: any): string {
+  private static generateSmartAdviceResponse(userProfile: UserProfile | null, context: ConversationContext, analysis: any, randomSeed: number): string {
     if (!userProfile) {
       return "I'd love to give you personalized advice! Please complete your profile first so I can provide guidance tailored to your specific goals and situation.";
     }
@@ -580,7 +619,7 @@ export class AdvancedIntelligentAI {
     }
   }
 
-  private static generateSmartMotivationResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], context: ConversationContext, analysis: any): string {
+  private static generateSmartMotivationResponse(userProfile: UserProfile | null, recentWorkouts: WorkoutSession[], context: ConversationContext, analysis: any, randomSeed: number): string {
     if (!userProfile) {
       return "You've got this! Every fitness journey starts with a single step. I'm here to support you every step of the way toward your goals.";
     }
@@ -604,7 +643,7 @@ export class AdvancedIntelligentAI {
     }
   }
 
-  private static generateSmartGeneralResponse(userProfile: UserProfile | null, context: ConversationContext, analysis: any): string {
+  private static generateSmartGeneralResponse(userProfile: UserProfile | null, context: ConversationContext, analysis: any, randomSeed: number): string {
     if (!userProfile) {
       return "I'm here to help you achieve your fitness goals! Whether it's workouts, nutrition, progress tracking, or motivation, I've got your back. What would you like to work on today?";
     }
