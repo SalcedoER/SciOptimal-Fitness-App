@@ -498,6 +498,13 @@ export class AdvancedAIService {
   }
 
   // Additional response methods for other intents...
+  private static modifyWorkoutResponse(context: ConversationContext, mood: string): AIResponse {
+    return {
+      content: "I'd be happy to modify your workout! What specific changes would you like to make?",
+      suggestions: ["Make it harder", "Make it easier", "Change the focus", "Add cardio", "Remove exercises"],
+      action: 'generate_workout'
+    };
+  }
 
   private static harderWorkoutResponse(context: ConversationContext, mood: string): AIResponse {
     return {

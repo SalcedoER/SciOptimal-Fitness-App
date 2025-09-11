@@ -228,7 +228,7 @@ export class NaturalLanguageProcessor {
         return 'generate_workout';
       }
       if (messageLower.includes('modify') || messageLower.includes('change') || messageLower.includes('adjust')) {
-        return 'modify_workout';
+        return 'generate_workout';
       }
       if (messageLower.includes('harder') || messageLower.includes('tougher') || messageLower.includes('challenge')) {
         return 'harder_workout';
